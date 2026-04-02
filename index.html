@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>crop-with-gamepad</title>
+		<meta name="description" content="adsf" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<link rel="icon" href="/favicon.ico" sizes="48x48" />
+		<link rel="icon" href="/logo.svg" sizes="any" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+			rel="stylesheet"
+		/>
+		<!-- <link -->
+		<!-- 	href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap" -->
+		<!-- 	rel="stylesheet" -->
+		<!-- /> -->
+		<link
+			id="symbols"
+			href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
+			rel="stylesheet"
+		/>
+
+		<!-- <meta name="theme-color" content="#6750A4" /> -->
+		<script>
+			const meta = document.createElement('meta')
+			const surfaceContainer =
+				localStorage.getItem('surface-container-color') ?? '#6750A4'
+			document.head.prepend(meta)
+			meta.name = 'theme-color'
+			meta.content = surfaceContainer
+		</script>
+	</head>
+	<body>
+		<material-shell id="shell"></material-shell>
+		<script type="module" src="./src/loader.ts"></script>
+	</body>
+</html>

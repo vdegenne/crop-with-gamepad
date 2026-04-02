@@ -1,0 +1,15 @@
+:host {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+[slot='navigationIcon'] md-icon-button {
+	--md-icon-button-icon-size: 30px;
+}
+[slot='title'] {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin-left: -14px;
+}
