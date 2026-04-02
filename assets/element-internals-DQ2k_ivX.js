@@ -1,0 +1,1 @@
+var e=Symbol(`internals`),t=Symbol(`privateInternals`);function n(n){class r extends n{get[e](){return this[t]||(this[t]=this.attachInternals()),this[t]}}return r}export{n,e as t};
