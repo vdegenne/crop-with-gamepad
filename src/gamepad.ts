@@ -27,6 +27,7 @@ class GamepadController extends ReactiveController {
 				RIGHT_STICK_UP: rup,
 				RIGHT_STICK_DOWN: rdown,
 				RIGHT_BUTTONS_RIGHT: B,
+				LEFT_BUTTONS_LEFT: dpadleft,
 			} = map
 
 			const SPEED = 0.009
@@ -105,6 +106,13 @@ class GamepadController extends ReactiveController {
 					0,
 					ctrl.bounds.w,
 				)
+			})
+
+			gamepad.for(dpadleft).before(({mode}) => {
+				if (mode === Mode.PRIMARY) {
+					main.copyCroppedImageInClipboard()
+					window.open('https://chatgpt.com/')
+				}
 			})
 
 			gamepad.for(B).before(({mode}) => {
