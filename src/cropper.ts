@@ -1,5 +1,5 @@
-import {Debouncer} from '@vdegenne/debouncer'
 import {state} from '@snar/lit'
+import {Debouncer} from '@vdegenne/debouncer'
 import {css, html, LitElement, PropertyValues} from 'lit'
 import {withStyles} from 'lit-with-styles'
 import {customElement} from 'lit/decorators.js'
