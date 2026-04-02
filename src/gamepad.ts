@@ -12,7 +12,7 @@ class GamepadController extends ReactiveController {
 		const minigp = new MiniGamepad({
 			// pollSleepMs: 900,
 			focusDeadTimeMs: 200,
-			axesThreshold: 0.1,
+			axesThreshold: 0.15,
 		})
 		minigp.onConnect((gamepad) => {
 			// document.body.requestPointerLock()
