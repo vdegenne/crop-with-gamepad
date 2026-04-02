@@ -107,10 +107,10 @@ export class PageMain extends PageElement {
 
 			const naturalWidth = this.imgElement.naturalWidth
 			const naturalHeight = this.imgElement.naturalHeight
-			cropperCtrl.x = 0
-			cropperCtrl.y = 0
-			cropperCtrl.w = naturalWidth
-			cropperCtrl.h = naturalHeight
+			cropperCtrl.x1 = 0
+			cropperCtrl.y1 = 0
+			cropperCtrl.x2 = naturalWidth
+			cropperCtrl.y2 = naturalHeight
 			cropperCtrl.bounds = {w: naturalWidth, h: naturalHeight}
 		}
 

@@ -33,44 +33,48 @@ class GamepadController extends ReactiveController {
 			const clamp = (v: number, min: number, max: number) =>
 				Math.max(min, Math.min(max, v))
 
+			const normalize = () => {
+				if (ctrl.x1 > ctrl.x2) [ctrl.x1, ctrl.x2] = [ctrl.x2, ctrl.x1]
+				if (ctrl.y1 > ctrl.y2) [ctrl.y1, ctrl.y2] = [ctrl.y2, ctrl.y1]
+			}
+
 			gamepad.on(lup, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.y = clamp(ctrl.y - SPEED * -value, 0, ctrl.bounds.h - ctrl.h)
+				ctrl.y1 = clamp(ctrl.y1 - SPEED * -value, 0, ctrl.bounds.h)
 			})
 
 			gamepad.on(ldown, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.y = clamp(ctrl.y + SPEED * value, 0, ctrl.bounds.h - ctrl.h)
+				ctrl.y1 = clamp(ctrl.y1 + SPEED * value, 0, ctrl.bounds.h)
 			})
 
 			gamepad.on(lleft, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.x = clamp(ctrl.x - SPEED * -value, 0, ctrl.bounds.w - ctrl.w)
+				ctrl.x1 = clamp(ctrl.x1 - SPEED * -value, 0, ctrl.bounds.w)
 			})
 
 			gamepad.on(lright, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.x = clamp(ctrl.x + SPEED * value, 0, ctrl.bounds.w - ctrl.w)
+				ctrl.x1 = clamp(ctrl.x1 + SPEED * value, 0, ctrl.bounds.w)
 			})
-
 			gamepad.on(rup, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.h = clamp(ctrl.h - SPEED * -value, 1, ctrl.bounds.h - ctrl.y)
+				ctrl.y2 = clamp(ctrl.y2 - SPEED * -value, 0, ctrl.bounds.h)
 			})
 
 			gamepad.on(rdown, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.h = clamp(ctrl.h + SPEED * value, 1, ctrl.bounds.h - ctrl.y)
+				ctrl.y2 = clamp(ctrl.y2 + SPEED * value, 0, ctrl.bounds.h)
 			})
 
 			gamepad.on(rleft, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.w = clamp(ctrl.w - SPEED * -value, 1, ctrl.bounds.w - ctrl.x)
+				ctrl.x2 = clamp(ctrl.x2 - SPEED * -value, 0, ctrl.bounds.w)
 			})
 
 			gamepad.on(rright, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.w = clamp(ctrl.w + SPEED * value, 1, ctrl.bounds.w - ctrl.x)
+				ctrl.x2 = clamp(ctrl.x2 + SPEED * value, 0, ctrl.bounds.w)
 			})
 		})
 	}
