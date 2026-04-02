@@ -1,7 +1,7 @@
 import {ReactiveController} from '@snar/lit'
 import {MGamepad, MiniGamepad, Mode} from '@vdegenne/mini-gamepad'
 import {state} from 'lit/decorators.js'
-import {cropperCtrl} from './cropper.js'
+import {cropper} from './cropper.js'
 
 class GamepadController extends ReactiveController {
 	@state() gamepad: MGamepad | undefined
@@ -27,16 +27,11 @@ class GamepadController extends ReactiveController {
 				RIGHT_STICK_DOWN: rdown,
 			} = map
 
-			const SPEED = 5
-			const ctrl = cropperCtrl
+			const SPEED = 10
+			const ctrl = cropper
 
 			const clamp = (v: number, min: number, max: number) =>
 				Math.max(min, Math.min(max, v))
-
-			const normalize = () => {
-				if (ctrl.x1 > ctrl.x2) [ctrl.x1, ctrl.x2] = [ctrl.x2, ctrl.x1]
-				if (ctrl.y1 > ctrl.y2) [ctrl.y1, ctrl.y2] = [ctrl.y2, ctrl.y1]
-			}
 
 			gamepad.on(lup, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return

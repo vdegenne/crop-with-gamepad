@@ -3,7 +3,6 @@ import {css, html} from 'lit'
 import {withStyles} from 'lit-with-styles'
 import {customElement, query, state} from 'lit/decorators.js'
 import toast from 'toastit'
-import {cropper, cropperCtrl} from '../cropper.js'
 import {store} from '../store.js'
 import {
 	getBlobKey,
@@ -12,6 +11,7 @@ import {
 	saveImageToDB,
 } from '../utils.js'
 import {PageElement} from './PageElement.js'
+import {cropper} from '../cropper.js'
 
 declare global {
 	interface HTMLElementTagNameMap {
@@ -38,7 +38,6 @@ export class PageMain extends PageElement {
 	}
 
 	render() {
-		console.log(cropper)
 		return html`<!---->
 			${this.blobUrl
 				? html`<!-- -->
@@ -47,8 +46,8 @@ export class PageMain extends PageElement {
 								src=${this.blobUrl}
 								class="absolute inset-0 w-full h-full object-contain"
 							/>
+							${cropper}
 						</div>
-						${cropper}
 						<!-- -->`
 				: null}
 			<!----> `
@@ -107,11 +106,11 @@ export class PageMain extends PageElement {
 
 			const naturalWidth = this.imgElement.naturalWidth
 			const naturalHeight = this.imgElement.naturalHeight
-			cropperCtrl.x1 = 0
-			cropperCtrl.y1 = 0
-			cropperCtrl.x2 = naturalWidth
-			cropperCtrl.y2 = naturalHeight
-			cropperCtrl.bounds = {w: naturalWidth, h: naturalHeight}
+			cropper.x1 = 0
+			cropper.y1 = 0
+			cropper.x2 = naturalWidth
+			cropper.y2 = naturalHeight
+			cropper.bounds = {w: naturalWidth, h: naturalHeight}
 		}
 
 		toast(`Image from ${source}`)
