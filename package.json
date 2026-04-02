@@ -93,7 +93,7 @@
     "tailwindcss": "^4.2.2",
     "toastit": "^2.2.2",
     "typescript": "^6.0.2",
-    "vite": "^8.0.3",
+    "vite": "^7.3.1",
     "vite-plugin-mdicon2svg": "^0.2.3",
     "vscode-ui-connector": "^0.2.4",
     "wireit": "^0.14.12"
