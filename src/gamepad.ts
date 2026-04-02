@@ -12,6 +12,7 @@ class GamepadController extends ReactiveController {
 		const minigp = new MiniGamepad({
 			// pollSleepMs: 900,
 			focusDeadTimeMs: 200,
+			axesThreshold: 0.1,
 		})
 		minigp.onConnect((gamepad) => {
 			// document.body.requestPointerLock()
@@ -30,14 +31,15 @@ class GamepadController extends ReactiveController {
 				LEFT_BUTTONS_LEFT: dpadleft,
 			} = map
 
-			const SPEED = 0.009
+			const SPEED = 0.005
 			const ctrl = cropper
 
 			const clamp = (v: number, min: number, max: number) =>
 				Math.max(min, Math.min(max, v))
 
-			gamepad.on(lup, ({mode, value}) => {
+			gamepad.for(lup).on(({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
+				console.log(value)
 				ctrl.y1 = clamp(
 					ctrl.y1 - SPEED * ctrl.bounds.h * -value,
 					0,

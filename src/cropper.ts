@@ -6,8 +6,11 @@ import {customElement} from 'lit/decorators.js'
 
 @customElement('cropper-element')
 @withStyles(css`
+	:host {
+		position: fixed;
+	}
 	.mask {
-		background: rgba(0, 0, 0, 0.5);
+		background: rgba(0, 0, 0, 0.7);
 		clip-path: polygon(
 			0% 0%,
 			0% 100%,
@@ -72,27 +75,19 @@ export class CropperElement extends LitElement {
 		return html`
 			<div
 				class="relative w-full h-full"
-				style="
-	left: ${this.imageBox.x}px;
-	top: ${this.imageBox.y}px;
-	width: ${this.imageBox.w}px;
-	height: ${this.imageBox.h}px;
-      --x1: ${left}%;
-      --y1: ${top}%;
-      --x2: ${left + width}%;
-      --y2: ${top + height}%;
-    "
+				style="--x1:${left}%;--y1:${top}%;--x2:${left + width}%;--y2:${top +
+				height}%;"
 			>
 				<div class="absolute inset-0 mask"></div>
 
 				<div
-					class="absolute pointer-events-none"
+					class="absolute pointer-events-none border border-(--md-sys-color-secondary) box-border"
 					style="
-        left: var(--x1);
-        top: var(--y1);
-        width: calc(var(--x2) - var(--x1));
-        height: calc(var(--y2) - var(--y1));
-      "
+				    left: var(--x1);
+				    top: var(--y1);
+				    width: calc(var(--x2) - var(--x1));
+				    height: calc(var(--y2) - var(--y1));
+				  "
 				></div>
 			</div>
 		`

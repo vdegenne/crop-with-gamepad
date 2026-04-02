@@ -44,7 +44,10 @@ export class PageMain extends PageElement {
 		return html`<!---->
 			${this.blobUrl
 				? html`<!-- -->
-						<div id="container" class="fixed inset-0 -bg-green-500">
+						<div
+							id="container"
+							class="fixed inset-0 bg-(--md-sys-color-primary)"
+						>
 							<img
 								src=${this.blobUrl}
 								class="absolute inset-0 w-full h-full object-contain"
@@ -127,12 +130,17 @@ export class PageMain extends PageElement {
 		const naturalWidth = this.imgElement.naturalWidth
 		const naturalHeight = this.imgElement.naturalHeight
 
-		cropper.imageBox = computeContainBox(
+		const values = computeContainBox(
 			this.containerElement.clientWidth,
 			this.containerElement.clientHeight,
 			naturalWidth,
 			naturalHeight,
 		)
+
+		cropper.style.left = values.x + 'px'
+		cropper.style.top = values.y + 'px'
+		cropper.style.width = values.w + 'px'
+		cropper.style.height = values.h + 'px'
 	}
 
 	copyCroppedImageInClipboard() {
