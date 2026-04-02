@@ -304,3 +304,62 @@ export async function loadImageFromDB(): Promise<Blob | null> {
 		req.onerror = () => reject(req.error)
 	})
 }
+
+type Crop = {
+	x: number
+	y: number
+	w: number
+	h: number
+}
+
+export async function copyCroppedImageToClipboard(
+	img: HTMLImageElement,
+	crop: Crop,
+) {
+	const canvas = document.createElement('canvas')
+	canvas.width = crop.w
+	canvas.height = crop.h
+
+	const ctx = canvas.getContext('2d')
+	if (!ctx) return
+
+	ctx.drawImage(img, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h)
+
+	const blob = await new Promise<Blob | null>((resolve) =>
+		canvas.toBlob((b) => resolve(b), 'image/png'),
+	)
+
+	if (!blob) return
+
+	await navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+}
+
+export function computeContainBox(
+	cw: number,
+	ch: number,
+	iw: number,
+	ih: number,
+) {
+	const containerRatio = cw / ch
+	const imageRatio = iw / ih
+
+	if (imageRatio > containerRatio) {
+		const w = cw
+		const h = cw / imageRatio
+		return {
+			x: 0,
+			y: (ch - h) / 2,
+			w,
+			h,
+		}
+	} else {
+		const h = ch
+		const w = ch * imageRatio
+		return {
+			x: (cw - w) / 2,
+			y: 0,
+			w,
+			h,
+		}
+	}
+}

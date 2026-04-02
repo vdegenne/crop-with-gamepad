@@ -5,6 +5,8 @@ import {customElement, query, state} from 'lit/decorators.js'
 import toast from 'toastit'
 import {store} from '../store.js'
 import {
+	computeContainBox,
+	copyCroppedImageToClipboard,
 	getBlobKey,
 	getClipboardImage,
 	loadImageFromDB,
@@ -30,6 +32,7 @@ export let main: PageMain
 export class PageMain extends PageElement {
 	@state() blobUrl?: string
 
+	@query('#container') containerElement!: HTMLDivElement
 	@query('img') imgElement!: HTMLImageElement
 
 	constructor() {
@@ -41,7 +44,7 @@ export class PageMain extends PageElement {
 		return html`<!---->
 			${this.blobUrl
 				? html`<!-- -->
-						<div class="fixed inset-0 -bg-green-500">
+						<div id="container" class="fixed inset-0 -bg-green-500">
 							<img
 								src=${this.blobUrl}
 								class="absolute inset-0 w-full h-full object-contain"
@@ -100,12 +103,16 @@ export class PageMain extends PageElement {
 		await this.updateComplete
 		await this.imgElement.decode()
 
+		const naturalWidth = this.imgElement.naturalWidth
+		const naturalHeight = this.imgElement.naturalHeight
+
+		this.computeContainBox()
+		window.addEventListener('resize', () => this.computeContainBox())
+
 		if (newImage) {
 			console.log('Nouvelle image, reset values')
 			saveImageToDB(imgBlob)
 
-			const naturalWidth = this.imgElement.naturalWidth
-			const naturalHeight = this.imgElement.naturalHeight
 			cropper.x1 = 0
 			cropper.y1 = 0
 			cropper.x2 = naturalWidth
@@ -114,5 +121,35 @@ export class PageMain extends PageElement {
 		}
 
 		toast(`Image from ${source}`)
+	}
+
+	computeContainBox() {
+		const naturalWidth = this.imgElement.naturalWidth
+		const naturalHeight = this.imgElement.naturalHeight
+
+		cropper.imageBox = computeContainBox(
+			this.containerElement.clientWidth,
+			this.containerElement.clientHeight,
+			naturalWidth,
+			naturalHeight,
+		)
+	}
+
+	copyCroppedImageInClipboard() {
+		if (!this.imgElement) return
+
+		const {x1, y1, x2, y2} = cropper
+
+		try {
+			copyCroppedImageToClipboard(this.imgElement, {
+				x: x1,
+				y: y1,
+				w: x2 - x1,
+				h: y2 - y1,
+			})
+			toast('Copied to clipboard')
+		} catch {
+			toast('An error has occured.')
+		}
 	}
 }

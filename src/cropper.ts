@@ -32,6 +32,13 @@ export class CropperElement extends LitElement {
 		h: 0,
 	}
 
+	@state() imageBox: {x: number; y: number; w: number; h: number} = {
+		x: 0,
+		y: 0,
+		w: 0,
+		h: 0,
+	}
+
 	// Natural clama
 	update(changed: PropertyValues<this>) {
 		if (this.x1 > this.x2) {
@@ -66,6 +73,10 @@ export class CropperElement extends LitElement {
 			<div
 				class="relative w-full h-full"
 				style="
+	left: ${this.imageBox.x}px;
+	top: ${this.imageBox.y}px;
+	width: ${this.imageBox.w}px;
+	height: ${this.imageBox.h}px;
       --x1: ${left}%;
       --y1: ${top}%;
       --x2: ${left + width}%;
