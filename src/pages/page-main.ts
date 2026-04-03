@@ -78,7 +78,7 @@ export class PageMain extends PageElement {
 
 		let imgBlob = clipboard! ?? db!
 		let source: 'clipboard' | 'db' = clipboard ? 'clipboard' : 'db'
-		console.log(`choosen source:`, source)
+		console.log(`[choosen initial source]`, source)
 
 		if (clipboard && db) {
 			const imgBlobKey = await getBlobKey(clipboard)
@@ -101,6 +101,7 @@ export class PageMain extends PageElement {
 			}
 		}
 
+		console.log(`[choosen target source]`, source)
 		const key = await getBlobKey(imgBlob)
 		console.log('--- target img blob key ---')
 		console.log(key)
@@ -108,7 +109,8 @@ export class PageMain extends PageElement {
 		console.log(this.lastImageKey)
 
 		if (key === this.lastImageKey) {
-			toast('Same image, no reload')
+			console.log('Same keys, aborting.')
+			toast('Same images')
 			return
 		}
 		this.lastImageKey = key
