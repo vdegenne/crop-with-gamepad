@@ -61,7 +61,14 @@ export class PageMain extends PageElement {
 
 	protected firstUpdated() {
 		this.loadImage()
-		window.addEventListener('paste', () => this.loadImage())
+		window.addEventListener('paste', async () => {
+			let clipboard = await getClipboardImage()
+			if (clipboard === null) {
+				toast('No image to paste')
+				return
+			}
+			this.loadImage()
+		})
 	}
 
 	private lastImageKey: string | null = null
@@ -110,7 +117,9 @@ export class PageMain extends PageElement {
 
 		if (key === this.lastImageKey) {
 			console.log('Same keys, aborting.')
-			toast('Same images')
+			if (clipboard) {
+				toast('Same images')
+			}
 			return
 		}
 		this.lastImageKey = key
