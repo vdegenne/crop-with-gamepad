@@ -125,9 +125,6 @@ export class PageMain extends PageElement {
 		const naturalWidth = this.imgElement.naturalWidth
 		const naturalHeight = this.imgElement.naturalHeight
 
-		this.computeContainBox()
-		window.addEventListener('resize', () => this.computeContainBox())
-
 		if (newImage) {
 			console.log('Nouvelle image, reset values')
 			saveImageToDB(imgBlob)
@@ -140,6 +137,9 @@ export class PageMain extends PageElement {
 		}
 
 		toast(`Image from ${source}`)
+
+		this.computeContainBox()
+		window.addEventListener('resize', () => this.computeContainBox())
 	}
 
 	computeContainBox() {
