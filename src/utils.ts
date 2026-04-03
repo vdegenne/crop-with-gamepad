@@ -253,7 +253,16 @@ export async function getBlobKey(blob: Blob) {
 }
 
 export async function getClipboardImage(): Promise<Blob | null> {
+	await navigator.clipboard.readText().catch(() => {}) // petit hack?
 	const items = await navigator.clipboard.read()
+	console.log('==== Clipboard content ====')
+	console.log(
+		JSON.stringify(
+			items.map((item) => ({types: item.types})),
+			null,
+			2,
+		),
+	)
 
 	for (const item of items) {
 		for (const type of item.types) {

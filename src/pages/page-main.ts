@@ -68,6 +68,7 @@ export class PageMain extends PageElement {
 
 	async loadImage() {
 		let clipboard = await getClipboardImage()
+		console.log(`Clipboard image ?`, clipboard)
 		const db = await loadImageFromDB()
 
 		if (!clipboard && !db) {
@@ -77,26 +78,39 @@ export class PageMain extends PageElement {
 
 		let imgBlob = clipboard! ?? db!
 		let source: 'clipboard' | 'db' = clipboard ? 'clipboard' : 'db'
+		console.log(`choosen source:`, source)
 
 		if (clipboard && db) {
-			const [a, b] = await Promise.all([getBlobKey(clipboard), getBlobKey(db)])
+			const imgBlobKey = await getBlobKey(clipboard)
+			const dbBlobKey = await getBlobKey(db)
+			console.log('--- img blob key ---')
+			console.log(imgBlobKey)
+			// console.log('--------------------')
+			console.log('--- db blob key ---')
+			console.log(dbBlobKey)
+			// console.log('--------------------')
 
-			if (a === b) {
+			if (imgBlobKey === dbBlobKey) {
+				console.log('Same blob keys, keeping db image')
 				imgBlob = db
 				source = 'db'
 			} else {
+				console.log('Different blob keys, keeping clipboard img')
 				imgBlob = clipboard
 				source = 'clipboard'
 			}
 		}
 
 		const key = await getBlobKey(imgBlob)
+		console.log('--- target img blob key ---')
+		console.log(key)
+		console.log('--- last blob key (ID) ---')
+		console.log(this.lastImageKey)
 
-		if (this.lastImageKey === key) {
+		if (key === this.lastImageKey) {
 			toast('Same image, no reload')
 			return
 		}
-
 		this.lastImageKey = key
 
 		const newImage = source === 'clipboard'
