@@ -30,6 +30,8 @@ class GamepadController extends ReactiveController {
 				RIGHT_STICK_DOWN: rdown,
 				RIGHT_BUTTONS_RIGHT: B,
 				LEFT_BUTTONS_LEFT: dpadleft,
+				LEFT_BUTTONS_BOTTOM: dpaddown,
+				LEFT_STICK_PRESS: lpress,
 			} = map
 
 			const SPEED = 0.005
@@ -113,15 +115,30 @@ class GamepadController extends ReactiveController {
 
 			gamepad.for(dpadleft).before(async ({mode}) => {
 				if (mode === Mode.PRIMARY) {
-					main.copyCroppedImageInClipboard()
-					await sleep(10)
-					window.open('https://chatgpt.com/')
+					const url = 'https://chatgpt.com/'
+					window.location.href = url
+				}
+			})
+			gamepad.for(dpaddown).before(({mode}) => {
+				switch (mode) {
+					case Mode.NORMAL:
+						const url = 'https://www.google.com/?olud'
+						window.location.href = url
+						break
 				}
 			})
 
 			gamepad.for(B).before(({mode}) => {
 				if (mode === Mode.NORMAL) {
 					main.copyCroppedImageInClipboard()
+				}
+			})
+
+			gamepad.for(lpress).before(({mode}) => {
+				switch (mode) {
+					case Mode.NORMAL:
+						main.copyCroppedImageInClipboard()
+						break
 				}
 			})
 		})
