@@ -4,9 +4,11 @@ import {saveToLocalStorage} from 'snar-save-to-local-storage'
 import {availablePages} from './constants.js'
 import {Page} from './pages/index.js'
 
-// @saveToLocalStorage('crop-with-gamepad:store')
+@saveToLocalStorage('crop-with-gamepad:store')
 export class AppStore extends ReactiveController {
 	@state() page: Page = 'main'
+
+	@state() openLinksInNewTab = true
 
 	F = new FormBuilder(this)
 

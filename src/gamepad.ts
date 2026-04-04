@@ -4,6 +4,7 @@ import {state} from 'lit/decorators.js'
 import {cropper} from './cropper.js'
 import {main} from './pages/page-main.js'
 import {sleep} from './utils.js'
+import {store} from './store.js'
 
 class GamepadController extends ReactiveController {
 	@state() gamepad: MGamepad | undefined
@@ -116,14 +117,22 @@ class GamepadController extends ReactiveController {
 			gamepad.for(dpadleft).before(async ({mode}) => {
 				if (mode === Mode.PRIMARY) {
 					const url = 'https://chatgpt.com/'
-					window.location.href = url
+					if (store.openLinksInNewTab) {
+						window.open(url, '_blank')
+					} else {
+						window.location.href = url
+					}
 				}
 			})
 			gamepad.for(dpaddown).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
 						const url = 'https://www.google.com/?olud'
-						window.location.href = url
+						if (store.openLinksInNewTab) {
+							window.open(url, '_blank')
+						} else {
+							window.location.href = url
+						}
 						break
 				}
 			})

@@ -34,6 +34,10 @@ export class SettingsDialog extends LitElement {
 				</header>
 
 				<form slot="content" method="dialog" id="form" class="">
+					<card-element headline="global">
+						${store.F.SWITCH('Open links in new tab?', 'openLinksInNewTab')}
+					</card-element>
+
 					<card-element headline="theme">
 						${renderThemeElements()}
 					</card-element>
