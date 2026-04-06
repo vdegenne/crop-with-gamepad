@@ -3,6 +3,7 @@ import {css, html} from 'lit'
 import {withStyles} from 'lit-with-styles'
 import {customElement, query, state} from 'lit/decorators.js'
 import toast from 'toastit'
+import {cropper} from '../cropper.js'
 import {store} from '../store.js'
 import {
 	computeContainBox,
@@ -13,7 +14,6 @@ import {
 	saveImageToDB,
 } from '../utils.js'
 import {PageElement} from './PageElement.js'
-import {cropper} from '../cropper.js'
 
 declare global {
 	interface HTMLElementTagNameMap {
@@ -64,6 +64,7 @@ export class PageMain extends PageElement {
 		window.addEventListener('paste', async () => {
 			let clipboard = await getClipboardImage()
 			if (clipboard === null) {
+				// console.log('No image to paste')
 				toast('No image to paste')
 				return
 			}
@@ -79,7 +80,8 @@ export class PageMain extends PageElement {
 		const db = await loadImageFromDB()
 
 		if (!clipboard && !db) {
-			toast('No image found.')
+			console.log('No image found')
+			// toast('No image found.')
 			return
 		}
 
@@ -118,7 +120,8 @@ export class PageMain extends PageElement {
 		if (key === this.lastImageKey) {
 			console.log('Same keys, aborting.')
 			if (clipboard) {
-				toast('Same images')
+				console.log('same images')
+				// toast('Same images')
 			}
 			return
 		}
@@ -145,7 +148,8 @@ export class PageMain extends PageElement {
 			cropper.bounds = {w: naturalWidth, h: naturalHeight}
 		}
 
-		toast(`Image from ${source}`)
+		console.log(`Image from ${source}`)
+		// toast(`Image from ${source}`)
 
 		this.computeContainBox()
 		window.addEventListener('resize', () => this.computeContainBox())
