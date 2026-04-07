@@ -145,7 +145,7 @@ class GamepadController extends ReactiveController {
 
 			gamepad.for(lpress).before(({mode}) => {
 				switch (mode) {
-					case Mode.NORMAL:
+					case Mode.SECONDARY:
 						main.copyCroppedImageInClipboard()
 						break
 				}
