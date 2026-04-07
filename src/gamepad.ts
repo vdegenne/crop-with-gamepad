@@ -19,6 +19,7 @@ class GamepadController extends ReactiveController {
 		minigp.onConnect((gamepad) => {
 			// document.body.requestPointerLock()
 			this.gamepad = gamepad
+
 			const map = gamepad.mapping
 			const {
 				LEFT_STICK_UP: lup,
@@ -34,6 +35,15 @@ class GamepadController extends ReactiveController {
 				LEFT_BUTTONS_BOTTOM: dpaddown,
 				LEFT_STICK_PRESS: lpress,
 			} = map
+
+			window.addEventListener('voice-recorder-open', () => {
+				gamepad.enabled = false
+			})
+			window.addEventListener('voice-recorder-close', () => {
+				setTimeout(() => {
+					gamepad.enabled = true
+				}, 100)
+			})
 
 			const SPEED = 0.005
 			const ctrl = cropper
