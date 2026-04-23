@@ -10,6 +10,7 @@ import {
 	copyCroppedImageToClipboard,
 	getBlobKey,
 	getClipboardImage,
+	getCroppedImageBlob,
 	loadImageFromDB,
 	saveImageToDB,
 } from '../utils.js'
@@ -191,6 +192,28 @@ export class PageMain extends PageElement {
 			toast('Copied to clipboard')
 		} catch {
 			toast('An error has occured.')
+		}
+	}
+
+	async ocr() {
+		const {x1, y1, x2, y2} = cropper
+		const blob = await getCroppedImageBlob(this.imgElement, {
+			x: x1,
+			y: y1,
+			w: x2 - x1,
+			h: y2 - y1,
+		})
+		if (blob) {
+			const {createWorker} = await import('tesseract.js')
+			const worker = await createWorker('eng+fra')
+			worker.setParameters({
+				tessedit_pageseg_mode: PSM.AUTO,
+			})
+			const {data} = await worker.recognize(blob)
+			if (data && data.text) {
+				// toast(result)
+				return data.text
+			}
 		}
 	}
 }

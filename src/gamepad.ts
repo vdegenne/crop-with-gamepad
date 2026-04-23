@@ -4,7 +4,7 @@ import {MGamepad, MiniGamepad, Mode} from '@vdegenne/mini-gamepad'
 import {state} from 'lit/decorators.js'
 import {cropper} from './cropper.js'
 import {main} from './pages/page-main.js'
-import {getCroppedImageBlob, sleep} from './utils.js'
+import {copyToClipboard, getCroppedImageBlob, sleep} from './utils.js'
 import {store} from './store.js'
 import {getMainPage} from './pages/index.js'
 import toast from 'toastit'
@@ -136,24 +136,9 @@ class GamepadController extends ReactiveController {
 					// } else {
 					// 	window.location.href = url
 					// }
-					const {x1, y1, x2, y2} = cropper
-					const blob = await getCroppedImageBlob(getMainPage().imgElement, {
-						x: x1,
-						y: y1,
-						w: x2 - x1,
-						h: y2 - y1,
-					})
-					if (blob) {
-						const {createWorker} = await import('tesseract.js')
-						const worker = await createWorker('eng+fra')
-						worker.setParameters({
-							tessedit_pageseg_mode: PSM.AUTO,
-						})
-						const {data} = await worker.recognize(blob)
-						if (data && data.text) {
-							// toast(result)
-							textSelectorOpen(data.text)
-						}
+					const text = await getMainPage().ocr()
+					if (text) {
+						textSelectorOpen(text)
 					}
 				}
 			})
@@ -177,10 +162,17 @@ class GamepadController extends ReactiveController {
 				}
 			})
 
-			gamepad.for(lpress).before(({mode}) => {
+			gamepad.for(lpress).before(async ({mode}) => {
 				switch (mode) {
 					case Mode.SECONDARY:
 						main.copyCroppedImageInClipboard()
+						break
+					case Mode.TERTIARY:
+						const text = await getMainPage().ocr()
+						if (text) {
+							copyToClipboard(text)
+							toast(text.length > 20 ? text.slice(0, 20) + '...' : text)
+						}
 						break
 				}
 			})
