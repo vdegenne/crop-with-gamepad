@@ -1,10 +1,14 @@
+import {chatGptMediatorOpen, textSelectorOpen} from '@vdegenne/links'
 import {ReactiveController} from '@snar/lit'
 import {MGamepad, MiniGamepad, Mode} from '@vdegenne/mini-gamepad'
 import {state} from 'lit/decorators.js'
 import {cropper} from './cropper.js'
 import {main} from './pages/page-main.js'
-import {sleep} from './utils.js'
+import {getCroppedImageBlob, sleep} from './utils.js'
 import {store} from './store.js'
+import {getMainPage} from './pages/index.js'
+import toast from 'toastit'
+import {PSM} from 'tesseract.js'
 
 class GamepadController extends ReactiveController {
 	@state() gamepad: MGamepad | undefined
@@ -126,14 +130,34 @@ class GamepadController extends ReactiveController {
 
 			gamepad.for(dpadleft).before(async ({mode}) => {
 				if (mode === Mode.PRIMARY) {
-					const url = 'https://chatgpt.com/'
-					if (store.openLinksInNewTab) {
-						window.open(url, '_blank')
-					} else {
-						window.location.href = url
+					// const url = 'https://chatgpt.com/'
+					// if (store.openLinksInNewTab) {
+					// 	window.open(url, '_blank')
+					// } else {
+					// 	window.location.href = url
+					// }
+					const {x1, y1, x2, y2} = cropper
+					const blob = await getCroppedImageBlob(getMainPage().imgElement, {
+						x: x1,
+						y: y1,
+						w: x2 - x1,
+						h: y2 - y1,
+					})
+					if (blob) {
+						const {createWorker} = await import('tesseract.js')
+						const worker = await createWorker('eng+fra')
+						worker.setParameters({
+							tessedit_pageseg_mode: PSM.AUTO,
+						})
+						const {data} = await worker.recognize(blob)
+						if (data && data.text) {
+							// toast(result)
+							textSelectorOpen(data.text)
+						}
 					}
 				}
 			})
+
 			gamepad.for(dpaddown).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:

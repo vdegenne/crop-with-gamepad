@@ -1,4 +1,5 @@
 import {type PropertyValues} from 'snar'
+import toast from 'toastit'
 // import {toast} from 'toastit'
 
 export function copyToClipboard(text: string | number) {
@@ -321,10 +322,7 @@ type Crop = {
 	h: number
 }
 
-export async function copyCroppedImageToClipboard(
-	img: HTMLImageElement,
-	crop: Crop,
-) {
+export async function getCroppedImageBlob(img: HTMLImageElement, crop: Crop) {
 	const canvas = document.createElement('canvas')
 	canvas.width = crop.w
 	canvas.height = crop.h
@@ -334,14 +332,24 @@ export async function copyCroppedImageToClipboard(
 
 	ctx.drawImage(img, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h)
 
-	const blob = await new Promise<Blob>((resolve, reject) => {
+	return new Promise<Blob>((resolve, reject) => {
 		canvas.toBlob((b) => {
 			if (!b) reject(new Error('toBlob failed'))
 			else resolve(b)
 		}, 'image/png')
 	})
+}
 
-	await navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+export async function copyCroppedImageToClipboard(
+	img: HTMLImageElement,
+	crop: Crop,
+) {
+	try {
+		const blob = (await getCroppedImageBlob(img, crop))!
+		await navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+	} catch {
+		toast('Something went wrong')
+	}
 }
 
 export function computeContainBox(

@@ -141,10 +141,14 @@ export class PageMain extends PageElement {
 			console.log('Nouvelle image, reset values')
 			saveImageToDB(imgBlob)
 
-			cropper.x1 = 0
-			cropper.y1 = 0
-			cropper.x2 = naturalWidth
-			cropper.y2 = naturalHeight
+			const marginX = naturalWidth * 0.25
+			const marginY = naturalHeight * 0.25
+
+			cropper.x1 = marginX
+			cropper.y1 = marginY
+			cropper.x2 = naturalWidth - marginX
+			cropper.y2 = naturalHeight - marginY
+
 			cropper.bounds = {w: naturalWidth, h: naturalHeight}
 		}
 
