@@ -1,14 +1,13 @@
-import {chatGptMediatorOpen, textSelectorOpen} from '@vdegenne/links'
 import {ReactiveController} from '@snar/lit'
+import {textSelectorOpen} from '@vdegenne/links'
 import {MGamepad, MiniGamepad, Mode} from '@vdegenne/mini-gamepad'
 import {state} from 'lit/decorators.js'
-import {cropper} from './cropper.js'
-import {main} from './pages/page-main.js'
-import {copyToClipboard, getCroppedImageBlob, sleep} from './utils.js'
-import {store} from './store.js'
-import {getMainPage} from './pages/index.js'
 import toast from 'toastit'
-import {PSM} from 'tesseract.js'
+import {cropper} from './cropper.js'
+import {getMainPage} from './pages/index.js'
+import {main} from './pages/page-main.js'
+import {store} from './store.js'
+import {copyToClipboard} from './utils.js'
 
 class GamepadController extends ReactiveController {
 	@state() gamepad: MGamepad | undefined

@@ -204,7 +204,7 @@ export class PageMain extends PageElement {
 			h: y2 - y1,
 		})
 		if (blob) {
-			const {createWorker} = await import('tesseract.js')
+			const {createWorker, PSM} = await import('tesseract.js')
 			const worker = await createWorker('eng+fra')
 			worker.setParameters({
 				tessedit_pageseg_mode: PSM.AUTO,
