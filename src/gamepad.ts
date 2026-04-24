@@ -138,6 +138,8 @@ class GamepadController extends ReactiveController {
 					const text = await getMainPage().ocr()
 					if (text) {
 						textSelectorOpen(text)
+					} else {
+						toast('No text found')
 					}
 				}
 			})
@@ -171,6 +173,8 @@ class GamepadController extends ReactiveController {
 						if (text) {
 							copyToClipboard(text)
 							toast(text.length > 20 ? text.slice(0, 20) + '...' : text)
+						} else {
+							toast('No text found')
 						}
 						break
 				}
