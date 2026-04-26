@@ -1,5 +1,5 @@
 import {ReactiveController} from '@snar/lit'
-import {textSelectorOpen} from '@vdegenne/links'
+import {textSelectorOpen, textSelectorUrl} from '@vdegenne/links'
 import {MGamepad, MiniGamepad, Mode} from '@vdegenne/mini-gamepad'
 import {state} from 'lit/decorators.js'
 import toast from 'toastit'
@@ -137,7 +137,7 @@ class GamepadController extends ReactiveController {
 					// }
 					const text = await getMainPage().ocr()
 					if (text) {
-						textSelectorOpen(text)
+						window.location.href = textSelectorUrl(text)
 					} else {
 						toast('No text found')
 					}
