@@ -128,7 +128,9 @@ class GamepadController extends ReactiveController {
 			})
 
 			gamepad.for(dpadleft).before(async ({mode}) => {
-				if (mode === Mode.PRIMARY) {
+				if (mode === Mode.NORMAL) {
+					window.location.href = 'https://chatgpt.com/'
+				} else if (mode === Mode.PRIMARY) {
 					// const url = 'https://chatgpt.com/'
 					// if (store.openLinksInNewTab) {
 					// 	window.open(url, '_blank')
