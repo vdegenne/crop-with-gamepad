@@ -177,13 +177,13 @@ export class PageMain extends PageElement {
 		cropper.style.height = values.h + 'px'
 	}
 
-	copyCroppedImageInClipboard() {
+	async copyCroppedImageInClipboard() {
 		if (!this.imgElement) return
 
 		const {x1, y1, x2, y2} = cropper
 
 		try {
-			copyCroppedImageToClipboard(this.imgElement, {
+			await copyCroppedImageToClipboard(this.imgElement, {
 				x: x1,
 				y: y1,
 				w: x2 - x1,
