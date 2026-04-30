@@ -1,1 +1,0 @@
-import{P as p,b as g,t as v,w,a as O,i as P,s as i}from"./index-DZC-jfOc.js";var _=Object.getOwnPropertyDescriptor,c=(t,s,o,a)=>{for(var e=a>1?void 0:a?_(s,o):s,r=t.length-1,l;r>=0;r--)(l=t[r])&&(e=l(e)||e);return e};let n=class extends p{render(){return g`404 NOT FOUND`}};n=c([v("page-404"),w(i),O(P``)],n);export{n as Page404};
