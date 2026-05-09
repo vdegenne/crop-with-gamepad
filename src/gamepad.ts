@@ -130,7 +130,12 @@ class GamepadController extends ReactiveController {
 			gamepad.for(dpadleft).before(async ({mode}) => {
 				if (mode === Mode.NORMAL) {
 					await getMainPage().copyCroppedImageInClipboard()
-					window.location.href = 'https://chatgpt.com/'
+					const url = 'https://chatgpt.com/'
+					if (store.openLinksInNewTab) {
+						window.open(url, '_blank')
+					} else {
+						window.location.href = url
+					}
 				} else if (mode === Mode.PRIMARY) {
 					// const url = 'https://chatgpt.com/'
 					// if (store.openLinksInNewTab) {
@@ -140,7 +145,11 @@ class GamepadController extends ReactiveController {
 					// }
 					const text = await getMainPage().ocr()
 					if (text) {
-						window.location.href = textSelectorUrl(text)
+						if (store.openLinksInNewTab) {
+							textSelectorOpen(text)
+						} else {
+							window.location.href = textSelectorUrl(text)
+						}
 					} else {
 						toast('No text found')
 					}
