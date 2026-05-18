@@ -205,14 +205,19 @@ export class PageMain extends PageElement {
 		})
 		if (blob) {
 			const {createWorker, PSM} = await import('tesseract.js')
-			const worker = await createWorker('eng+fra+jpn')
+			const worker = await createWorker(store.ocrLanguage)
 			worker.setParameters({
 				tessedit_pageseg_mode: PSM.AUTO,
+				// preserve_interword_spaces: '0',
 			})
 			const {data} = await worker.recognize(blob)
 			if (data && data.text) {
-				// toast(result)
-				return data.text
+				let {text} = data
+				if (store.ocrLanguage === 'jpn') {
+					text = text.replace(/\s+/g, '')
+				}
+				// toast(text)
+				return text
 			}
 		}
 	}

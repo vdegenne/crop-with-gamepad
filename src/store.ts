@@ -3,6 +3,10 @@ import {FormBuilder} from '@vdegenne/forms/FormBuilder.js'
 import {saveToLocalStorage} from 'snar-save-to-local-storage'
 import {availablePages} from './constants.js'
 import {Page} from './pages/index.js'
+import toast from 'toastit'
+
+const availableOcrLanguages = ['eng+fra', 'jpn'] as const
+type AvailableOcrLanguages = (typeof availableOcrLanguages)[number]
 
 @saveToLocalStorage('crop-with-gamepad:store')
 export class AppStore extends ReactiveController {
@@ -10,7 +14,13 @@ export class AppStore extends ReactiveController {
 
 	@state() openLinksInNewTab = true
 
+	@state() ocrLanguage: AvailableOcrLanguages = 'eng+fra'
+
 	F = new FormBuilder(this)
+
+	protected firstUpdated(_changedProperties: PropertyValues): void {
+		this.ocrLanguage = 'eng+fra'
+	}
 
 	protected updated(changed: PropertyValues<this>) {
 		// const {hash, router} = await import('./router.js')
@@ -25,6 +35,14 @@ export class AppStore extends ReactiveController {
 				})
 				.catch(() => {})
 		}
+
+		toast(this.ocrLanguage)
+	}
+
+	cycleNextAvailableOcrLanguage() {
+		const index = availableOcrLanguages.indexOf(this.ocrLanguage)
+		const nextIndex = (index + 1) % availableOcrLanguages.length
+		this.ocrLanguage = availableOcrLanguages[nextIndex]!
 	}
 }
 
