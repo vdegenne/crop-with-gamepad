@@ -5,7 +5,7 @@ import {availablePages} from './constants.js'
 import {Page} from './pages/index.js'
 import toast from 'toastit'
 
-const availableOcrLanguages = ['eng+fra', 'jpn'] as const
+const availableOcrLanguages = ['eng+fra', 'jpn', 'grc'] as const
 type AvailableOcrLanguages = (typeof availableOcrLanguages)[number]
 
 @saveToLocalStorage('crop-with-gamepad:store')
