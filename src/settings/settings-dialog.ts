@@ -36,6 +36,10 @@ export class SettingsDialog extends LitElement {
 				<form slot="content" method="dialog" id="form" class="">
 					<card-element headline="global">
 						${store.F.SWITCH('Open links in new tab?', 'openLinksInNewTab')}
+						${store.F.SWITCH('Persist language', 'persistLang', {
+							supportingText:
+								'When using controller to switch language the selected language persists across page refresh',
+						})}
 					</card-element>
 
 					<card-element headline="theme">

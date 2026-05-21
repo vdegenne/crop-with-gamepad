@@ -15,11 +15,14 @@ export class AppStore extends ReactiveController {
 	@state() openLinksInNewTab = true
 
 	@state() ocrLanguage: AvailableOcrLanguages = 'eng+fra'
+	@state() persistLang = false
 
 	F = new FormBuilder(this)
 
 	protected firstUpdated(_changedProperties: PropertyValues): void {
-		this.ocrLanguage = 'eng+fra'
+		if (!this.persistLang) {
+			this.ocrLanguage = 'eng+fra'
+		}
 	}
 
 	protected updated(changed: PropertyValues<this>) {
