@@ -11,6 +11,7 @@ import {
 	getBlobKey,
 	getClipboardImage,
 	getCroppedImageBlob,
+	getRemoteImage,
 	loadImageFromDB,
 	saveImageToDB,
 } from '../utils.js'
@@ -76,18 +77,24 @@ export class PageMain extends PageElement {
 	private lastImageKey: string | null = null
 
 	async loadImage() {
+		let remote = await getRemoteImage()
+		console.log(`Remote image ?`, remote)
 		let clipboard = await getClipboardImage()
 		console.log(`Clipboard image ?`, clipboard)
 		const db = await loadImageFromDB()
 
-		if (!clipboard && !db) {
+		if (!remote && !clipboard && !db) {
 			console.log('No image found')
 			// toast('No image found.')
 			return
 		}
 
-		let imgBlob = clipboard! ?? db!
-		let source: 'clipboard' | 'db' = clipboard ? 'clipboard' : 'db'
+		let imgBlob = (remote ?? clipboard ?? db)!
+		let source: 'remote' | 'clipboard' | 'db' = remote
+			? 'remote'
+			: clipboard
+				? 'clipboard'
+				: 'db'
 		console.log(`[choosen initial source]`, source)
 
 		if (clipboard && db) {
@@ -109,6 +116,10 @@ export class PageMain extends PageElement {
 				imgBlob = clipboard
 				source = 'clipboard'
 			}
+		}
+
+		if (remote) {
+			imgBlob = remote
 		}
 
 		console.log(`[choosen target source]`, source)

@@ -50,7 +50,8 @@
       "service": true,
       "command": "vite --host",
       "dependencies": [
-        "vuc"
+        "vuc",
+        "pwa-assets"
       ]
     },
     "build:vite": {
@@ -63,6 +64,23 @@
       ],
       "output": [
         "./dist/"
+      ],
+      "dependencies": [
+        "pwa-assets"
+      ]
+    },
+    "pwa-assets": {
+      "command": "pwa-assets-generator --preset minimal-2023 --html.preset 2023 public/logo.svg",
+      "files": [
+        "public/logo.svg"
+      ],
+      "output": [
+        "public/pwa-64x64.png",
+        "public/pwa-192x192.png",
+        "public/pwa-512x512.png",
+        "public/maskable-icon-512x512.png",
+        "public/apple-touch-icon-180x180.png",
+        "public/favicon.ico"
       ]
     }
   },
@@ -81,6 +99,7 @@
     "@vdegenne/mini-rest": "^0.3.2",
     "@vdegenne/rollup-plugin-minify-html": "^1.0.6",
     "@vdegenne/router": "^0.1.8",
+    "@vite-pwa/assets-generator": "^1.0.2",
     "custom-element-decorator": "^0.6.0",
     "html-vision": "^0.3.10",
     "lit": "^3.3.2",
@@ -97,11 +116,13 @@
     "typescript": "^6.0.3",
     "vite": "^7.3.2",
     "vite-plugin-mdicon2svg": "^0.2.3",
+    "vite-plugin-pwa": "^1.3.0",
     "vscode-ui-connector": "^0.2.4",
     "wireit": "^0.14.12"
   },
   "scripts": {
     "dev": "wireit",
-    "build": "wireit"
+    "build": "wireit",
+    "pwa-assets": "wireit"
   }
 }

@@ -57,7 +57,6 @@ class GamepadController extends ReactiveController {
 
 			gamepad.for(lup).on(({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				console.log(value)
 				ctrl.y1 = clamp(
 					ctrl.y1 - SPEED * ctrl.bounds.h * -value,
 					0,

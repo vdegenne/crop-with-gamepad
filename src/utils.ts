@@ -275,6 +275,23 @@ export async function getClipboardImage(): Promise<Blob | null> {
 
 	return null
 }
+
+export async function getRemoteImage(): Promise<Blob | null> {
+	const params = new URLSearchParams(window.location.search)
+	const src = params.get('src')
+
+	if (!src) return null
+
+	try {
+		const response = await fetch(src)
+		if (!response.ok) return null
+
+		return await response.blob()
+	} catch {
+		return null
+	}
+}
+
 function openDB(): Promise<IDBDatabase> {
 	return new Promise((resolve, reject) => {
 		const request = indexedDB.open('screenshot-db', 1)
