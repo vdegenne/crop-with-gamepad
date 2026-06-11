@@ -16,6 +16,7 @@ import {
 	saveImageToDB,
 } from '../utils.js'
 import {PageElement} from './PageElement.js'
+import {ocrLanguageFlags} from '../constants.js'
 
 declare global {
 	interface HTMLElementTagNameMap {
@@ -55,6 +56,9 @@ export class PageMain extends PageElement {
 								class="absolute inset-0 w-full h-full object-contain"
 							/>
 							${cropper}
+						</div>
+						<div class="fixed bottom-0 left-0">
+							${ocrLanguageFlags[store.ocrLanguage]}
 						</div>
 						<!-- -->`
 				: null}

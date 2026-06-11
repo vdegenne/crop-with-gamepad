@@ -38,6 +38,7 @@ class GamepadController extends ReactiveController {
 				LEFT_BUTTONS_BOTTOM: dpaddown,
 				LEFT_STICK_PRESS: lpress,
 				L1: l1,
+				R1: r1,
 			} = map
 
 			window.addEventListener('voice-recorder-open', () => {
@@ -193,9 +194,9 @@ class GamepadController extends ReactiveController {
 				}
 			})
 
-			gamepad.for(l1).before(({mode}) => {
+			gamepad.for(r1).before(({mode}) => {
 				switch (mode) {
-					case Mode.SECONDARY:
+					case Mode.NORMAL:
 						store.cycleNextAvailableOcrLanguage()
 						break
 				}

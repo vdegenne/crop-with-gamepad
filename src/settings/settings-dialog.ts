@@ -1,10 +1,13 @@
 import type {MdDialog} from '@material/web/all.js'
+import '@material/web/chips/chip-set.js'
+import '@material/web/chips/filter-chip.js'
 import {withController} from '@snar/lit'
 import {customElement} from 'custom-element-decorator'
 import {html, LitElement} from 'lit'
 import {withStyles} from 'lit-with-styles'
 import {query, state} from 'lit/decorators.js'
 import '../card-element.js'
+import {availableOcrLanguages} from '../constants.js'
 import '../material/dialog-patch.js'
 import '../material/item-patch.js'
 import {store} from '../store.js'
@@ -36,9 +39,19 @@ export class SettingsDialog extends LitElement {
 				<form slot="content" method="dialog" id="form" class="">
 					<card-element headline="global">
 						${store.F.SWITCH('Open links in new tab?', 'openLinksInNewTab')}
-						${store.F.SWITCH('Persist language', 'persistLang', {
-							supportingText:
-								'When using controller to switch language the selected language persists across page refresh',
+					</card-element>
+
+					<card-element headline="OCR">
+						${store.F.FILTER(
+							'OCR languages',
+							'ocrActivatedLanguages',
+							availableOcrLanguages as any,
+							{
+								behavior: 'one-or-more',
+							},
+						)}
+						${store.F.SWITCH('Persist OCR language', 'persistLang', {
+							supportingText: 'Across page refresh',
 						})}
 					</card-element>
 
