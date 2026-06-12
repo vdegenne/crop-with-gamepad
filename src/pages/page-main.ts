@@ -17,6 +17,7 @@ import {
 } from '../utils.js'
 import {PageElement} from './PageElement.js'
 import {ocrLanguageFlags} from '../constants.js'
+import {playShutterAudio} from '../assets/assets.js'
 
 declare global {
 	interface HTMLElementTagNameMap {
@@ -204,7 +205,8 @@ export class PageMain extends PageElement {
 				w: x2 - x1,
 				h: y2 - y1,
 			})
-			toast('Copied to clipboard')
+			// toast('Copied to clipboard')
+			playShutterAudio()
 		} catch {
 			toast('An error has occured.')
 		}

@@ -37,5 +37,3 @@ window.addEventListener('keypress', async (event: KeyboardEvent) => {
 			break
 	}
 })
-
-export {}
