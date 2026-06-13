@@ -13,7 +13,7 @@ import {html} from 'lit'
 // }
 import shutterSrc from '/audio/shutter.flac'
 const AUDIO_SHUTTER = new Audio(shutterSrc)
-export function playShutterAudio(volume = 0.7) {
+export function playShutterAudio(volume = 0.5) {
 	AUDIO_SHUTTER.volume = volume
 	AUDIO_SHUTTER.currentTime = 0
 	AUDIO_SHUTTER.play()
