@@ -53,6 +53,9 @@ export class SettingsDialog extends LitElement {
 						${store.F.SWITCH('Persist OCR language', 'persistLang', {
 							supportingText: 'Across page refresh',
 						})}
+						${store.F.SWITCH('Switch speech', 'ocrSwitchSpeech', {
+							supportingText: 'Speak the selected lang when switched',
+						})}
 					</card-element>
 
 					<card-element headline="theme">
