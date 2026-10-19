@@ -212,6 +212,7 @@ export class PageMain extends PageElement {
 		padding?: number
 	} = {}) {
 		if (!this.#framedTextItems) {
+			toast('Analyzing, please wait...')
 			try {
 				const ocr = await this.getPaddleOCR()
 				if (!ocr) return
