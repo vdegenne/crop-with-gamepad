@@ -203,20 +203,22 @@ export class PageMain extends PageElement {
 
 	#framedIndex = 0
 	#framedTextItems: OcrResultItem[] | undefined
+	#frames: OcrResultItem[] | undefined
+	#framesMergeDistance: number | undefined
 
 	async loadFrames({
-		mergeDistance = 30,
+		mergeDistance = 20,
 	}: {
 		mergeDistance?: number
 	} = {}) {
 		if (!this.#framedTextItems) {
 			toast('Analyzing, please wait...')
+
 			try {
 				const ocr = await this.getPaddleOCR()
 				if (!ocr) return
 
 				const [result] = await ocr.predict(this.imgElement)
-
 				this.#framedTextItems = result?.items ?? []
 			} catch {
 				toast('Failed to load OCR.')
@@ -227,6 +229,10 @@ export class PageMain extends PageElement {
 		if (!this.#framedTextItems.length) {
 			toast('No text found.')
 			return
+		}
+
+		if (this.#frames && this.#framesMergeDistance === mergeDistance) {
+			return this.#frames
 		}
 
 		const items = this.#framedTextItems.map((item) => ({
@@ -297,10 +303,13 @@ export class PageMain extends PageElement {
 			}
 		}
 
-		return items
+		this.#frames = items
+		this.#framesMergeDistance = mergeDistance
+
+		return this.#frames
 	}
 
-	async cycleFrame(padding = 0) {
+	async cycleFrame(padding = 15) {
 		const frames = await this.loadFrames()
 
 		if (!frames) return
