@@ -1,4 +1,3 @@
-import {state} from '@snar/lit'
 import {Debouncer} from '@vdegenne/debouncer'
 import {css, html, LitElement} from 'lit'
 import {withStyles} from 'lit-with-styles'
@@ -7,8 +6,11 @@ import {customElement, query} from 'lit/decorators.js'
 @customElement('cropper-element')
 @withStyles(css`
 	:host {
-		position: fixed;
+		position: absolute;
+		inset: 0;
+		display: block;
 	}
+
 	.mask {
 		background: rgba(0, 0, 0, 0.7);
 		clip-path: polygon(
@@ -24,15 +26,17 @@ import {customElement, query} from 'lit/decorators.js'
 			100% 0%
 		);
 	}
+
+	.selection {
+		left: var(--x1);
+		top: var(--y1);
+		width: calc(var(--x2) - var(--x1));
+		height: calc(var(--y2) - var(--y1));
+		border: 1px solid var(--md-sys-color-secondary);
+		box-sizing: border-box;
+	}
 `)
 export class CropperElement extends LitElement {
-	@state() imageBox: {x: number; y: number; w: number; h: number} = {
-		x: 0,
-		y: 0,
-		w: 0,
-		h: 0,
-	}
-
 	#bounds = {w: 0, h: 0}
 
 	get bounds() {
@@ -46,16 +50,12 @@ export class CropperElement extends LitElement {
 		if (this.container) this.#applyCrop()
 	}
 
-	@query('.container') container!: HTMLDivElement
+	@query('.cropper-container') container!: HTMLDivElement
 
 	#x1 = 0
 	#y1 = 0
 	#x2 = 0
 	#y2 = 0
-	#left = 0
-	#top = 0
-	#width = 0
-	#height = 0
 
 	#updateCSSVar(name: string, value: number) {
 		this.container.style.setProperty(name, `${value}%`)
@@ -66,8 +66,7 @@ export class CropperElement extends LitElement {
 	}
 	set x1(value: number) {
 		this.#x1 = value
-		this.#left = (value / this.bounds.w) * 100
-		this.#updateCSSVar('--x1', this.#left)
+		this.#updateCSSVar('--x1', (value / this.bounds.w) * 100)
 		this.saveValues()
 	}
 
@@ -76,8 +75,7 @@ export class CropperElement extends LitElement {
 	}
 	set y1(value: number) {
 		this.#y1 = value
-		this.#top = (value / this.bounds.h) * 100
-		this.#updateCSSVar('--y1', this.#top)
+		this.#updateCSSVar('--y1', (value / this.bounds.h) * 100)
 		this.saveValues()
 	}
 
@@ -134,49 +132,18 @@ export class CropperElement extends LitElement {
 		} catch {}
 	}
 
-	// protected updated(changed: PropertyValues<this>) {
-	// 	if (changed.has('bounds')) {
-	// 		// Bounds affect all four derived values.
-	// 		this.#left = NaN
-	// 		this.#top = NaN
-	// 		this.#width = NaN
-	// 		this.#height = NaN
-	//
-	// 		this.#applyCrop()
-	// 	}
-	// }
-
 	#applyCrop() {
-		const left = (this.#x1 / this.bounds.w) * 100
-		const top = (this.#y1 / this.bounds.h) * 100
-		const right = (this.#x2 / this.bounds.w) * 100
-		const bottom = (this.#y2 / this.bounds.h) * 100
-
-		this.#left = left
-		this.#top = top
-		this.#width = right - left
-		this.#height = bottom - top
-
-		this.#updateCSSVar('--x1', left)
-		this.#updateCSSVar('--y1', top)
-		this.#updateCSSVar('--x2', right)
-		this.#updateCSSVar('--y2', bottom)
+		this.#updateCSSVar('--x1', (this.#x1 / this.bounds.w) * 100)
+		this.#updateCSSVar('--y1', (this.#y1 / this.bounds.h) * 100)
+		this.#updateCSSVar('--x2', (this.#x2 / this.bounds.w) * 100)
+		this.#updateCSSVar('--y2', (this.#y2 / this.bounds.h) * 100)
 	}
 
 	render() {
 		return html`
-			<div class="container relative w-full h-full">
-				<div class="absolute inset-0 mask"></div>
-
-				<div
-					class="absolute pointer-events-none border border-(--md-sys-color-secondary) box-border"
-					style="
-						left: var(--x1);
-						top: var(--y1);
-						width: calc(var(--x2) - var(--x1));
-						height: calc(var(--y2) - var(--y1));
-					"
-				></div>
+			<div class="cropper-container absolute inset-0">
+				<div class="mask absolute inset-0"></div>
+				<div class="selection absolute pointer-events-none"></div>
 			</div>
 		`
 	}

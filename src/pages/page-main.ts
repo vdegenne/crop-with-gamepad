@@ -9,7 +9,6 @@ import {ocrLanguageFlags} from '../constants.js'
 import {cropper} from '../cropper.js'
 import {store} from '../store.js'
 import {
-	computeContainBox,
 	copyCroppedImageToClipboard,
 	getBlobKey,
 	getClipboardImage,
@@ -30,10 +29,7 @@ export let main: PageMain
 
 @customElement('page-main')
 @withController(store)
-@withStyles(css`
-	:host {
-	}
-`)
+@withStyles(css``)
 export class PageMain extends PageElement {
 	@state() blobUrl?: string
 
@@ -54,11 +50,8 @@ export class PageMain extends PageElement {
 								id="container"
 								class="fixed inset-0 flex items-center justify-center bg-(--md-sys-color-primary)"
 							>
-								<div class="relative flex items-center justify-center">
-									<img
-										src=${this.blobUrl}
-										class="block max-w-full max-h-full object-contain"
-									/>
+								<div class="relative">
+									<img src="${this.blobUrl}" class="block" />
 									${cropper}
 								</div>
 							</div>
@@ -73,32 +66,25 @@ export class PageMain extends PageElement {
 
 	protected firstUpdated() {
 		this.loadImage()
+		window.addEventListener('resize', () => this.stretchImage())
 		window.addEventListener('paste', async () => {
-			let clipboard = await getClipboardImage()
+			const clipboard = await getClipboardImage()
 			if (clipboard === null) {
-				// console.log('No image to paste')
 				toast('No image to paste')
 				return
 			}
 			this.loadImage()
 		})
-		window.addEventListener('resize', () => this.computeContainBox())
 	}
 
 	private lastImageKey: string | null = null
 
 	async loadImage() {
-		let remote = await getRemoteImage()
-		console.log(`Remote image ?`, remote)
-		let clipboard = await getClipboardImage()
-		console.log(`Clipboard image ?`, clipboard)
+		const remote = await getRemoteImage()
+		const clipboard = await getClipboardImage()
 		const db = await loadImageFromDB()
 
-		if (!remote && !clipboard && !db) {
-			console.log('No image found')
-			// toast('No image found.')
-			return
-		}
+		if (!remote && !clipboard && !db) return
 
 		let imgBlob = (remote ?? clipboard ?? db)!
 		let source: 'remote' | 'clipboard' | 'db' = remote
@@ -106,24 +92,15 @@ export class PageMain extends PageElement {
 			: clipboard
 				? 'clipboard'
 				: 'db'
-		console.log(`[choosen initial source]`, source)
 
 		if (clipboard && db) {
 			const imgBlobKey = await getBlobKey(clipboard)
 			const dbBlobKey = await getBlobKey(db)
-			console.log('--- img blob key ---')
-			console.log(imgBlobKey)
-			// console.log('--------------------')
-			console.log('--- db blob key ---')
-			console.log(dbBlobKey)
-			// console.log('--------------------')
 
 			if (imgBlobKey === dbBlobKey) {
-				console.log('Same blob keys, keeping db image')
 				imgBlob = db
 				source = 'db'
 			} else {
-				console.log('Different blob keys, keeping clipboard img')
 				imgBlob = clipboard
 				source = 'clipboard'
 			}
@@ -131,25 +108,13 @@ export class PageMain extends PageElement {
 
 		if (remote) {
 			imgBlob = remote
+			source = 'remote'
 		}
 
-		console.log(`[choosen target source]`, source)
 		const key = await getBlobKey(imgBlob)
-		console.log('--- target img blob key ---')
-		console.log(key)
-		console.log('--- last blob key (ID) ---')
-		console.log(this.lastImageKey)
+		if (key === this.lastImageKey) return
 
-		if (key === this.lastImageKey) {
-			console.log('Same keys, aborting.')
-			if (clipboard) {
-				console.log('same images')
-				// toast('Same images')
-			}
-			return
-		}
 		this.lastImageKey = key
-
 		const newImage = source === 'clipboard'
 
 		this.blobUrl = URL.createObjectURL(imgBlob)
@@ -160,47 +125,39 @@ export class PageMain extends PageElement {
 		const naturalWidth = this.imgElement.naturalWidth
 		const naturalHeight = this.imgElement.naturalHeight
 
+		cropper.bounds = {w: naturalWidth, h: naturalHeight}
+
 		if (newImage) {
-			console.log('Nouvelle image, reset values')
 			saveImageToDB(imgBlob)
 
 			const marginX = naturalWidth * 0.25
 			const marginY = naturalHeight * 0.25
 
-			cropper.x1 = marginX
-			cropper.y1 = marginY
-			cropper.x2 = naturalWidth - marginX
-			cropper.y2 = naturalHeight - marginY
-
-			cropper.bounds = {w: naturalWidth, h: naturalHeight}
+			cropper.setCrop({
+				x1: marginX,
+				y1: marginY,
+				x2: naturalWidth - marginX,
+				y2: naturalHeight - marginY,
+			})
 		}
 
-		console.log(`Image from ${source}`)
-		// toast(`Image from ${source}`)
-
-		this.computeContainBox()
-		// window.addEventListener('resize', () => this.computeContainBox())
+		this.stretchImage()
 	}
 
-	computeContainBox() {
+	stretchImage() {
+		if (!this.imgElement?.naturalWidth || !this.imgElement?.naturalHeight)
+			return
+
 		const naturalWidth = this.imgElement.naturalWidth
 		const naturalHeight = this.imgElement.naturalHeight
 
-		const values = computeContainBox(
-			this.containerElement.clientWidth,
-			this.containerElement.clientHeight,
-			naturalWidth,
-			naturalHeight,
+		const scale = Math.min(
+			this.containerElement.clientWidth / naturalWidth,
+			this.containerElement.clientHeight / naturalHeight,
 		)
 
-		console.log('image natural width', naturalWidth)
-		console.log('image natural height', naturalHeight)
-		console.log('contain box values', values)
-
-		// cropper.style.left = values.x + 'px'
-		// cropper.style.top = values.y + 'px'
-		// cropper.style.width = values.w + 'px'
-		// cropper.style.height = values.h + 'px'
+		this.imgElement.style.width = `${naturalWidth * scale}px`
+		this.imgElement.style.height = `${naturalHeight * scale}px`
 	}
 
 	async copyCroppedImageInClipboard() {
@@ -215,81 +172,183 @@ export class PageMain extends PageElement {
 				w: x2 - x1,
 				h: y2 - y1,
 			})
-			// toast('Copied to clipboard')
 			playShutterAudio()
 		} catch {
 			toast('An error has occured.')
 		}
 	}
 
-	// async ocr() {
-	// 	const {x1, y1, x2, y2} = cropper
-	// 	const blob = await getCroppedImageBlob(this.imgElement, {
-	// 		x: x1,
-	// 		y: y1,
-	// 		w: x2 - x1,
-	// 		h: y2 - y1,
-	// 	})
-	// 	if (blob) {
-	// 		const {createWorker, PSM} = await import('tesseract.js')
-	// 		const worker = await createWorker(store.ocrLanguage)
-	// 		worker.setParameters({
-	// 			tessedit_pageseg_mode: PSM.AUTO,
-	// 			// preserve_interword_spaces: '0',
-	// 		})
-	// 		const {data} = await worker.recognize(blob)
-	// 		if (data && data.text) {
-	// 			let {text} = data
-	// 			if (store.ocrLanguage === 'jpn') {
-	// 				text = text.replace(/\s+/g, '')
-	// 			}
-	// 			// toast(text)
-	// 			return text
-	// 		}
-	// 	}
-	// }
-
 	#paddleOCR:
 		| Awaited<
 				ReturnType<typeof import('@paddleocr/paddleocr-js').PaddleOCR.create>
 		  >
 		| undefined
+
 	async getPaddleOCR() {
 		if (!this.#paddleOCR) {
-			const {PaddleOCR} = await import('@paddleocr/paddleocr-js')
-			this.#paddleOCR = await PaddleOCR.create({
-				lang: 'japan',
-				ocrVersion: 'PP-OCRv5',
-			})
+			try {
+				const {PaddleOCR} = await import('@paddleocr/paddleocr-js')
+				this.#paddleOCR = await PaddleOCR.create({
+					lang: 'japan',
+					ocrVersion: 'PP-OCRv5',
+				})
+			} catch (err) {
+				toast("Couldn't create paddleOCR")
+				return
+			}
 		}
 
 		return this.#paddleOCR
 	}
 
 	#framedIndex = 0
-	#framedTextItems: OcrResultItem[] = []
+	#framedTextItems: OcrResultItem[] | undefined
 
-	async frameFoundText() {
-		if (!this.#framedTextItems.length) {
-			const ocr = await this.getPaddleOCR()
-			const [result] = await ocr.predict(this.imgElement)
-			if (result === undefined) {
-				toast('No text found.')
+	async loadFrames({
+		mergeDistance = 20,
+		padding = 10,
+	}: {
+		mergeDistance?: number
+		padding?: number
+	} = {}) {
+		if (!this.#framedTextItems) {
+			try {
+				const ocr = await this.getPaddleOCR()
+				if (!ocr) return
+
+				const [result] = await ocr.predict(this.imgElement)
+
+				this.#framedTextItems = result?.items ?? []
+			} catch {
+				toast('Failed to load OCR.')
 				return
 			}
-			this.#framedTextItems = result.items
 		}
 
-		if (!this.#framedTextItems.length) return
+		if (!this.#framedTextItems.length) {
+			toast('No text found.')
+			return
+		}
 
-		const item =
-			this.#framedTextItems[this.#framedIndex % this.#framedTextItems.length]
+		const items = this.#framedTextItems.map((item) => ({
+			...item,
+			poly: item.poly.map(([x, y]) => [x, y] as [number, number]),
+		}))
+
+		if (mergeDistance > 0) {
+			let merged = true
+
+			while (merged) {
+				merged = false
+
+				for (let i = 0; i < items.length; i++) {
+					const a = items[i]
+					if (!a) continue
+
+					const ax = a.poly.map(([x]) => x)
+					const ay = a.poly.map(([, y]) => y)
+					const aBox = {
+						x1: Math.min(...ax),
+						y1: Math.min(...ay),
+						x2: Math.max(...ax),
+						y2: Math.max(...ay),
+					}
+
+					for (let j = i + 1; j < items.length; j++) {
+						const b = items[j]
+						if (!b) continue
+
+						const bx = b.poly.map(([x]) => x)
+						const by = b.poly.map(([, y]) => y)
+						const bBox = {
+							x1: Math.min(...bx),
+							y1: Math.min(...by),
+							x2: Math.max(...bx),
+							y2: Math.max(...by),
+						}
+
+						const dx = Math.max(0, aBox.x1 - bBox.x2, bBox.x1 - aBox.x2)
+						const dy = Math.max(0, aBox.y1 - bBox.y2, bBox.y1 - aBox.y2)
+
+						if (Math.hypot(dx, dy) > mergeDistance) continue
+
+						const x1 = Math.min(aBox.x1, bBox.x1)
+						const y1 = Math.min(aBox.y1, bBox.y1)
+						const x2 = Math.max(aBox.x2, bBox.x2)
+						const y2 = Math.max(aBox.y2, bBox.y2)
+
+						items[i] = {
+							...a,
+							text: `${a.text} ${b.text}`,
+							poly: [
+								[x1, y1],
+								[x2, y1],
+								[x2, y2],
+								[x1, y2],
+							],
+						}
+
+						items.splice(j, 1)
+						merged = true
+						break
+					}
+
+					if (merged) break
+				}
+			}
+		}
+
+		if (padding > 0) {
+			for (const item of items) {
+				const xs = item.poly.map(([x]) => x)
+				const ys = item.poly.map(([, y]) => y)
+
+				const x1 = Math.min(...xs) - padding
+				const y1 = Math.min(...ys) - padding
+				const x2 = Math.max(...xs) + padding
+				const y2 = Math.max(...ys) + padding
+
+				item.poly = [
+					[x1, y1],
+					[x2, y1],
+					[x2, y2],
+					[x1, y2],
+				]
+			}
+		}
+
+		return items
+	}
+
+	async cycleFrame() {
+		const frames = await this.loadFrames()
+
+		if (!frames) return
+
+		const item = frames[this.#framedIndex % frames.length]
+
+		if (!item) return
 
 		this.#framedIndex++
 
-		cropper
+		const xs = item.poly.map(([x]) => x)
+		const ys = item.poly.map(([, y]) => y)
+
+		cropper.setCrop({
+			x1: Math.min(...xs),
+			y1: Math.min(...ys),
+			x2: Math.max(...xs),
+			y2: Math.max(...ys),
+		})
 
 		return item
+	}
+
+	async getFrameText() {
+		const frames = await this.loadFrames()
+		if (!frames) return
+
+		return frames[this.#framedIndex - 1]?.text
 	}
 
 	async ocr() {
@@ -303,13 +362,18 @@ export class PageMain extends PageElement {
 
 		if (!blob) return
 
-		const {PaddleOCR} = await import('@paddleocr/paddleocr-js')
-		const ocr = await PaddleOCR.create({
-			lang: 'japan',
-			ocrVersion: 'PP-OCRv5',
-		})
+		try {
+			const ocr = await this.getPaddleOCR()
+			if (!ocr) return
 
-		const [result] = await ocr.predict(blob)
-		return result?.items.map((item) => item.text).join('\n')
+			const [result] = await ocr.predict(blob)
+			if (result === undefined) {
+				toast('No text found.')
+				return
+			}
+			return result.items.map((item) => item.text).join('\n')
+		} catch {
+			toast('Something went wrong')
+		}
 	}
 }

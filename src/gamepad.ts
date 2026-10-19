@@ -113,7 +113,7 @@ class GamepadController extends ReactiveController {
 					// } else {
 					// 	window.location.href = url
 					// }
-					const text = await getMainPage().ocr()
+					const text = await getMainPage().getFrameText()
 					if (text) {
 						if (store.openLinksInNewTab) {
 							textSelectorOpen(text)
@@ -174,6 +174,7 @@ class GamepadController extends ReactiveController {
 			gamepad.for(X).before(({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
+						getMainPage()?.cycleFrame()
 						break
 				}
 			})

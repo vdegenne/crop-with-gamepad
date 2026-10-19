@@ -1,8 +1,7 @@
-import {defineConfig} from 'vite'
 import {materialShell} from 'material-shell/vite.js'
 import {materialAll} from 'rollup-plugin-material-all'
+import {defineConfig} from 'vite'
 import {mdicon2svg} from 'vite-plugin-mdicon2svg'
-import {PORT} from './src/server/constants.ts'
 
 /**
  * @type {import('vite').Plugin[]}
@@ -14,7 +13,7 @@ const plugins = [
 			// console.log(file);
 			if (
 				['data.json', 'server.js', 'server.ts'].some((ignore) =>
-					file.endsWith(ignore)
+					file.endsWith(ignore),
 				)
 			) {
 				// Ne rien faire = ne pas déclencher de HMR ni de reload
@@ -32,7 +31,7 @@ if (process.env.NODE_ENV.startsWith('dev')) {
 			vscodeUiConnectorPlugin({
 				ignoredShadowDoms: ['color-picker', 'color-mode-picker'],
 				debug: true,
-			})
+			}),
 		)
 	} catch {}
 }
@@ -58,7 +57,7 @@ plugins.push(
 			'./node_modules/@vdegenne/forms/lib/FormBuilder.js',
 			'./node_modules/@vdegenne/player/lib/player-dialog.js',
 		],
-	})
+	}),
 )
 
 if (process.env.NODE_ENV === 'production') {
@@ -75,7 +74,7 @@ if (process.env.NODE_ENV === 'production') {
 		plugins.push(
 			viteSingleFile({
 				useRecommendedBuildConfig: false,
-			})
+			}),
 		)
 	} catch {}
 }
@@ -122,13 +121,16 @@ try {
 					},
 				],
 			},
-		})
+		}),
 	)
 } catch {}
 
 /** CONFIG */
 export default defineConfig({
 	base: './',
+	optimizeDeps: {
+		exclude: ['onnxruntime-web'],
+	},
 	resolve: {
 		// preserveSymlinks: true,
 	},
