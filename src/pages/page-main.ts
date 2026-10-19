@@ -192,7 +192,7 @@ export class PageMain extends PageElement {
 					lang: 'japan',
 					ocrVersion: 'PP-OCRv5',
 				})
-			} catch (err) {
+			} catch {
 				toast("Couldn't create paddleOCR")
 				return
 			}

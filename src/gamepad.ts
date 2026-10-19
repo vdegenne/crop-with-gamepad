@@ -171,10 +171,17 @@ class GamepadController extends ReactiveController {
 				}
 			})
 
-			gamepad.for(X).before(({mode}) => {
+			let isCycling = false
+			gamepad.for(X).before(async ({mode}) => {
 				switch (mode) {
 					case Mode.NORMAL:
-						getMainPage()?.cycleFrame()
+						if (isCycling) return
+						try {
+							isCycling = true
+							await getMainPage()?.cycleFrame()
+						} finally {
+							isCycling = false
+						}
 						break
 				}
 			})
