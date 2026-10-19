@@ -3,6 +3,8 @@ import {css, html} from 'lit'
 import {withStyles} from 'lit-with-styles'
 import {customElement, query, state} from 'lit/decorators.js'
 import toast from 'toastit'
+import {playShutterAudio} from '../assets/assets.js'
+import {ocrLanguageFlags} from '../constants.js'
 import {cropper} from '../cropper.js'
 import {store} from '../store.js'
 import {
@@ -16,8 +18,6 @@ import {
 	saveImageToDB,
 } from '../utils.js'
 import {PageElement} from './PageElement.js'
-import {ocrLanguageFlags} from '../constants.js'
-import {playShutterAudio} from '../assets/assets.js'
 
 declare global {
 	interface HTMLElementTagNameMap {
@@ -46,23 +46,25 @@ export class PageMain extends PageElement {
 
 	render() {
 		return html`<!---->
-			${this.blobUrl
-				? html`<!-- -->
-						<div
-							id="container"
-							class="fixed inset-0 bg-(--md-sys-color-primary)"
-						>
-							<img
-								src=${this.blobUrl}
-								class="absolute inset-0 w-full h-full object-contain"
-							/>
-							${cropper}
-						</div>
-						<div class="fixed bottom-0 left-0">
-							${ocrLanguageFlags[store.ocrLanguage]}
-						</div>
-						<!-- -->`
-				: null}
+			${
+				this.blobUrl
+					? html`<!-- -->
+							<div
+								id="container"
+								class="fixed inset-0 bg-(--md-sys-color-primary)"
+							>
+								<img
+									src=${this.blobUrl}
+									class="absolute inset-0 w-full h-full object-contain"
+								/>
+								${cropper}
+							</div>
+							<div class="fixed bottom-0 left-0">
+								${ocrLanguageFlags[store.ocrLanguage]}
+							</div>
+							<!-- -->`
+					: null
+			}
 			<!----> `
 	}
 
@@ -212,6 +214,33 @@ export class PageMain extends PageElement {
 		}
 	}
 
+	// async ocr() {
+	// 	const {x1, y1, x2, y2} = cropper
+	// 	const blob = await getCroppedImageBlob(this.imgElement, {
+	// 		x: x1,
+	// 		y: y1,
+	// 		w: x2 - x1,
+	// 		h: y2 - y1,
+	// 	})
+	// 	if (blob) {
+	// 		const {createWorker, PSM} = await import('tesseract.js')
+	// 		const worker = await createWorker(store.ocrLanguage)
+	// 		worker.setParameters({
+	// 			tessedit_pageseg_mode: PSM.AUTO,
+	// 			// preserve_interword_spaces: '0',
+	// 		})
+	// 		const {data} = await worker.recognize(blob)
+	// 		if (data && data.text) {
+	// 			let {text} = data
+	// 			if (store.ocrLanguage === 'jpn') {
+	// 				text = text.replace(/\s+/g, '')
+	// 			}
+	// 			// toast(text)
+	// 			return text
+	// 		}
+	// 	}
+	// }
+
 	async ocr() {
 		const {x1, y1, x2, y2} = cropper
 		const blob = await getCroppedImageBlob(this.imgElement, {
@@ -220,22 +249,16 @@ export class PageMain extends PageElement {
 			w: x2 - x1,
 			h: y2 - y1,
 		})
-		if (blob) {
-			const {createWorker, PSM} = await import('tesseract.js')
-			const worker = await createWorker(store.ocrLanguage)
-			worker.setParameters({
-				tessedit_pageseg_mode: PSM.AUTO,
-				// preserve_interword_spaces: '0',
-			})
-			const {data} = await worker.recognize(blob)
-			if (data && data.text) {
-				let {text} = data
-				if (store.ocrLanguage === 'jpn') {
-					text = text.replace(/\s+/g, '')
-				}
-				// toast(text)
-				return text
-			}
-		}
+
+		if (!blob) return
+
+		const {PaddleOCR} = await import('@paddleocr/paddleocr-js')
+		const ocr = await PaddleOCR.create({
+			lang: 'japan',
+			ocrVersion: 'PP-OCRv5',
+		})
+
+		const [result] = await ocr.predict(blob)
+		return result?.items.map((item) => item.text).join('\n')
 	}
 }

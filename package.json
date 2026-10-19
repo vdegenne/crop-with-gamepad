@@ -87,6 +87,7 @@
   "devDependencies": {
     "@material/mwc-top-app-bar": "^0.27.0",
     "@material/web": "^2.4.1",
+    "@paddleocr/paddleocr-js": "^0.4.2",
     "@snar/lit": "^1.8.1",
     "@tailwindcss/postcss": "^4.2.4",
     "@vdegenne/about-dialog": "^0.4.2",
