@@ -333,8 +333,8 @@ export class PageMain extends PageElement {
 		return item
 	}
 
-	async getFrameText() {
-		const frames = await this.loadFrames()
+	getFrameText() {
+		const frames = this.#frames
 		if (!frames) return
 
 		return frames[this.#framedIndex - 1]?.text

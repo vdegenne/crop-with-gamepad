@@ -113,7 +113,8 @@ class GamepadController extends ReactiveController {
 					// } else {
 					// 	window.location.href = url
 					// }
-					const text = await getMainPage().getFrameText()
+					const text =
+						getMainPage().getFrameText() ?? (await getMainPage()?.ocr())
 					if (text) {
 						if (store.openLinksInNewTab) {
 							textSelectorOpen(text)
