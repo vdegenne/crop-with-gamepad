@@ -205,11 +205,9 @@ export class PageMain extends PageElement {
 	#framedTextItems: OcrResultItem[] | undefined
 
 	async loadFrames({
-		mergeDistance = 20,
-		padding = 10,
+		mergeDistance = 30,
 	}: {
 		mergeDistance?: number
-		padding?: number
 	} = {}) {
 		if (!this.#framedTextItems) {
 			toast('Analyzing, please wait...')
@@ -299,29 +297,10 @@ export class PageMain extends PageElement {
 			}
 		}
 
-		if (padding > 0) {
-			for (const item of items) {
-				const xs = item.poly.map(([x]) => x)
-				const ys = item.poly.map(([, y]) => y)
-
-				const x1 = Math.min(...xs) - padding
-				const y1 = Math.min(...ys) - padding
-				const x2 = Math.max(...xs) + padding
-				const y2 = Math.max(...ys) + padding
-
-				item.poly = [
-					[x1, y1],
-					[x2, y1],
-					[x2, y2],
-					[x1, y2],
-				]
-			}
-		}
-
 		return items
 	}
 
-	async cycleFrame() {
+	async cycleFrame(padding = 0) {
 		const frames = await this.loadFrames()
 
 		if (!frames) return
@@ -336,10 +315,10 @@ export class PageMain extends PageElement {
 		const ys = item.poly.map(([, y]) => y)
 
 		cropper.setCrop({
-			x1: Math.min(...xs),
-			y1: Math.min(...ys),
-			x2: Math.max(...xs),
-			y2: Math.max(...ys),
+			x1: Math.min(...xs) - padding,
+			y1: Math.min(...ys) - padding,
+			x2: Math.max(...xs) + padding,
+			y2: Math.max(...ys) + padding,
 		})
 
 		return item
