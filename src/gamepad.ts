@@ -34,6 +34,7 @@ class GamepadController extends ReactiveController {
 				RIGHT_STICK_UP: rup,
 				RIGHT_STICK_DOWN: rdown,
 				RIGHT_BUTTONS_RIGHT: B,
+				RIGHT_BUTTONS_LEFT: X,
 				LEFT_BUTTONS_LEFT: dpadleft,
 				LEFT_BUTTONS_BOTTOM: dpaddown,
 				LEFT_STICK_PRESS: lpress,
@@ -50,7 +51,7 @@ class GamepadController extends ReactiveController {
 				}, 100)
 			})
 
-			const SPEED = 0.005
+			const SPEED = 0.007
 			const ctrl = cropper
 
 			const clamp = (v: number, min: number, max: number) =>
@@ -58,74 +59,42 @@ class GamepadController extends ReactiveController {
 
 			gamepad.for(lup).on(({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.y1 = clamp(
-					ctrl.y1 - SPEED * ctrl.bounds.h * -value,
-					0,
-					ctrl.bounds.h,
-				)
+				ctrl.y1 -= SPEED * ctrl.bounds.h * -value
 			})
 
 			gamepad.on(ldown, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.y1 = clamp(
-					ctrl.y1 + SPEED * ctrl.bounds.h * value,
-					0,
-					ctrl.bounds.h,
-				)
+				ctrl.y1 += SPEED * ctrl.bounds.h * value
 			})
 
 			gamepad.on(lleft, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.x1 = clamp(
-					ctrl.x1 - SPEED * ctrl.bounds.w * -value,
-					0,
-					ctrl.bounds.w,
-				)
+				ctrl.x1 -= SPEED * ctrl.bounds.w * -value
 			})
 
 			gamepad.on(lright, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.x1 = clamp(
-					ctrl.x1 + SPEED * ctrl.bounds.w * value,
-					0,
-					ctrl.bounds.w,
-				)
+				ctrl.x1 += SPEED * ctrl.bounds.w * value
 			})
 
 			gamepad.on(rup, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.y2 = clamp(
-					ctrl.y2 - SPEED * ctrl.bounds.h * -value,
-					0,
-					ctrl.bounds.h,
-				)
+				ctrl.y2 -= SPEED * ctrl.bounds.h * -value
 			})
 
 			gamepad.on(rdown, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.y2 = clamp(
-					ctrl.y2 + SPEED * ctrl.bounds.h * value,
-					0,
-					ctrl.bounds.h,
-				)
+				ctrl.y2 += SPEED * ctrl.bounds.h * value
 			})
 
 			gamepad.on(rleft, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.x2 = clamp(
-					ctrl.x2 - SPEED * ctrl.bounds.w * -value,
-					0,
-					ctrl.bounds.w,
-				)
+				ctrl.x2 -= SPEED * ctrl.bounds.w * -value
 			})
 
 			gamepad.on(rright, ({mode, value}) => {
 				if (mode !== Mode.NORMAL) return
-				ctrl.x2 = clamp(
-					ctrl.x2 + SPEED * ctrl.bounds.w * value,
-					0,
-					ctrl.bounds.w,
-				)
+				ctrl.x2 += SPEED * ctrl.bounds.w * value
 			})
 
 			gamepad.for(dpadleft).before(async ({mode}) => {
@@ -198,6 +167,13 @@ class GamepadController extends ReactiveController {
 				switch (mode) {
 					case Mode.NORMAL:
 						store.cycleNextAvailableOcrLanguage()
+						break
+				}
+			})
+
+			gamepad.for(X).before(({mode}) => {
+				switch (mode) {
+					case Mode.NORMAL:
 						break
 				}
 			})

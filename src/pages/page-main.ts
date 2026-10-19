@@ -1,3 +1,4 @@
+import {OcrResultItem} from '@paddleocr/paddleocr-js'
 import {withController} from '@snar/lit'
 import {css, html} from 'lit'
 import {withStyles} from 'lit-with-styles'
@@ -45,27 +46,29 @@ export class PageMain extends PageElement {
 	}
 
 	render() {
-		return html`<!---->
+		return html`
 			${
 				this.blobUrl
-					? html`<!-- -->
+					? html`
 							<div
 								id="container"
-								class="fixed inset-0 bg-(--md-sys-color-primary)"
+								class="fixed inset-0 flex items-center justify-center bg-(--md-sys-color-primary)"
 							>
-								<img
-									src=${this.blobUrl}
-									class="absolute inset-0 w-full h-full object-contain"
-								/>
-								${cropper}
+								<div class="relative flex items-center justify-center">
+									<img
+										src=${this.blobUrl}
+										class="block max-w-full max-h-full object-contain"
+									/>
+									${cropper}
+								</div>
 							</div>
 							<div class="fixed bottom-0 left-0">
 								${ocrLanguageFlags[store.ocrLanguage]}
 							</div>
-							<!-- -->`
+						`
 					: null
 			}
-			<!----> `
+		`
 	}
 
 	protected firstUpdated() {
@@ -79,6 +82,7 @@ export class PageMain extends PageElement {
 			}
 			this.loadImage()
 		})
+		window.addEventListener('resize', () => this.computeContainBox())
 	}
 
 	private lastImageKey: string | null = null
@@ -175,7 +179,7 @@ export class PageMain extends PageElement {
 		// toast(`Image from ${source}`)
 
 		this.computeContainBox()
-		window.addEventListener('resize', () => this.computeContainBox())
+		// window.addEventListener('resize', () => this.computeContainBox())
 	}
 
 	computeContainBox() {
@@ -189,10 +193,14 @@ export class PageMain extends PageElement {
 			naturalHeight,
 		)
 
-		cropper.style.left = values.x + 'px'
-		cropper.style.top = values.y + 'px'
-		cropper.style.width = values.w + 'px'
-		cropper.style.height = values.h + 'px'
+		console.log('image natural width', naturalWidth)
+		console.log('image natural height', naturalHeight)
+		console.log('contain box values', values)
+
+		// cropper.style.left = values.x + 'px'
+		// cropper.style.top = values.y + 'px'
+		// cropper.style.width = values.w + 'px'
+		// cropper.style.height = values.h + 'px'
 	}
 
 	async copyCroppedImageInClipboard() {
@@ -240,6 +248,49 @@ export class PageMain extends PageElement {
 	// 		}
 	// 	}
 	// }
+
+	#paddleOCR:
+		| Awaited<
+				ReturnType<typeof import('@paddleocr/paddleocr-js').PaddleOCR.create>
+		  >
+		| undefined
+	async getPaddleOCR() {
+		if (!this.#paddleOCR) {
+			const {PaddleOCR} = await import('@paddleocr/paddleocr-js')
+			this.#paddleOCR = await PaddleOCR.create({
+				lang: 'japan',
+				ocrVersion: 'PP-OCRv5',
+			})
+		}
+
+		return this.#paddleOCR
+	}
+
+	#framedIndex = 0
+	#framedTextItems: OcrResultItem[] = []
+
+	async frameFoundText() {
+		if (!this.#framedTextItems.length) {
+			const ocr = await this.getPaddleOCR()
+			const [result] = await ocr.predict(this.imgElement)
+			if (result === undefined) {
+				toast('No text found.')
+				return
+			}
+			this.#framedTextItems = result.items
+		}
+
+		if (!this.#framedTextItems.length) return
+
+		const item =
+			this.#framedTextItems[this.#framedIndex % this.#framedTextItems.length]
+
+		this.#framedIndex++
+
+		cropper
+
+		return item
+	}
 
 	async ocr() {
 		const {x1, y1, x2, y2} = cropper
