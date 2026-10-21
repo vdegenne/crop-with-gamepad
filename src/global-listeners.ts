@@ -1,4 +1,5 @@
 import {cquerySelector} from 'html-vision'
+import toast from 'toastit'
 import {cropper} from './cropper.js'
 import {openSettingsDialog} from './imports.js'
 import {store} from './store.js'
@@ -43,6 +44,7 @@ window.addEventListener('keypress', async (event: KeyboardEvent) => {
 				x2: cropper.x2,
 				y2: cropper.y2,
 			}
+			toast('Crop values saved')
 			break
 	}
 })
