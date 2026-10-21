@@ -1,6 +1,7 @@
 import {cquerySelector} from 'html-vision'
-import {DEV} from './constants.js'
-import {getThemeStore, openSettingsDialog} from './imports.js'
+import {cropper} from './cropper.js'
+import {openSettingsDialog} from './imports.js'
+import {store} from './store.js'
 
 const inputNames = ['INPUT', 'TEXTAREA', 'MD-FILLED-TEXT-FIELD']
 export function eventIsFromInput(event: Event) {
@@ -34,6 +35,14 @@ window.addEventListener('keypress', async (event: KeyboardEvent) => {
 			break
 		case 's':
 			openSettingsDialog()
+			break
+		case 'c':
+			store.defaultCropValues = {
+				x1: cropper.x1,
+				y1: cropper.y1,
+				x2: cropper.x2,
+				y2: cropper.y2,
+			}
 			break
 	}
 })

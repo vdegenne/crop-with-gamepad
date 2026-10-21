@@ -133,12 +133,18 @@ export class PageMain extends PageElement {
 			const marginX = naturalWidth * 0.25
 			const marginY = naturalHeight * 0.25
 
-			cropper.setCrop({
+			let values: CropValues = {
 				x1: marginX,
 				y1: marginY,
 				x2: naturalWidth - marginX,
 				y2: naturalHeight - marginY,
-			})
+			}
+
+			if (store.defaultCropValues) {
+				values = store.defaultCropValues
+			}
+
+			cropper.setCrop(values)
 		}
 
 		this.stretchImage()

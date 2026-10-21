@@ -97,17 +97,7 @@ export class CropperElement extends LitElement {
 		this.saveValues()
 	}
 
-	setCrop({
-		x1,
-		y1,
-		x2,
-		y2,
-	}: {
-		x1?: number
-		y1?: number
-		x2?: number
-		y2?: number
-	}) {
+	setCrop({x1, y1, x2, y2}: CropValues) {
 		if (x1 !== undefined) this.x1 = x1
 		if (y1 !== undefined) this.y1 = y1
 		if (x2 !== undefined) this.x2 = x2

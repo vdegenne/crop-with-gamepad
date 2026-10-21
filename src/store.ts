@@ -20,6 +20,13 @@ export class AppStore extends ReactiveController {
 	@state() persistLang = false
 	@state() ocrSwitchSpeech = true
 
+	@state() defaultCropValues: {
+		x1: number
+		y1: number
+		x2: number
+		y2: number
+	} | null = null
+
 	F = new FormBuilder(this)
 
 	protected firstUpdated(_changedProperties: PropertyValues): void {
