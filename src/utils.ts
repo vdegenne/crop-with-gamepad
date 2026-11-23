@@ -1,6 +1,5 @@
 import {type PropertyValues} from 'snar'
-import toast from 'toastit'
-// import {toast} from 'toastit'
+import {toast} from './snackbar'
 
 export function copyToClipboard(text: string | number) {
 	navigator.clipboard.writeText(text + '')
@@ -365,7 +364,7 @@ export async function copyCroppedImageToClipboard(
 		const blob = (await getCroppedImageBlob(img, crop))!
 		await navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
 	} catch {
-		toast('Something went wrong')
+		toast({message: 'Something went wrong'})
 	}
 }
 

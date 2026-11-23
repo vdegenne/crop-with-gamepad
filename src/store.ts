@@ -1,12 +1,15 @@
 import {PropertyValues, ReactiveController, state} from '@snar/lit'
-import {FormBuilder} from '@vdegenne/forms/FormBuilder.js'
+import {FormBuilder} from '@vdegenne/forms'
 import {speakEnglish} from '@vdegenne/speech'
+import {Style} from '@vdegenne/voicevox/core'
 import {saveToLocalStorage} from 'snar-save-to-local-storage'
+import {availablePages} from './constants.js'
 import {
-	availableOcrLanguages,
 	AvailableOcrLanguages,
-	availablePages,
-} from './constants.js'
+	getOcrLanguageList,
+	OcrLanguageList,
+	ocrLanguages,
+} from './lang.js'
 import {Page} from './pages/index.js'
 
 @saveToLocalStorage('crop-with-gamepad:store')
@@ -15,10 +18,13 @@ export class AppStore extends ReactiveController {
 
 	@state() openLinksInNewTab = true
 
-	@state() ocrLanguage: AvailableOcrLanguages = 'eng+fra'
-	@state() ocrActivatedLanguages = availableOcrLanguages
+	@state() ocrLanguage: AvailableOcrLanguages = 'japan'
+	@state() ocrActivatedLanguages: OcrLanguageList = getOcrLanguageList()
+
 	@state() persistLang = false
 	@state() ocrSwitchSpeech = true
+
+	@state() voicevoxVoiceId: Style['id'] = 0
 
 	@state() defaultCropValues: {
 		x1: number
@@ -31,7 +37,7 @@ export class AppStore extends ReactiveController {
 
 	protected firstUpdated(_changedProperties: PropertyValues): void {
 		if (!this.persistLang) {
-			this.ocrLanguage = 'eng+fra'
+			this.ocrLanguage = 'japan'
 		}
 	}
 
@@ -51,11 +57,13 @@ export class AppStore extends ReactiveController {
 	}
 
 	cycleNextAvailableOcrLanguage() {
-		const index = this.ocrActivatedLanguages.indexOf(this.ocrLanguage) ?? -1
+		const index = this.ocrActivatedLanguages.indexOf(this.ocrLanguage)
 		const nextIndex = (index + 1) % this.ocrActivatedLanguages.length
+
 		this.ocrLanguage = this.ocrActivatedLanguages[nextIndex]!
+
 		if (store.ocrSwitchSpeech) {
-			speakEnglish(this.ocrLanguage)
+			speakEnglish(ocrLanguages[this.ocrLanguage].fullname)
 		}
 	}
 }

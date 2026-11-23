@@ -1,12 +1,12 @@
-import {OcrResultItem} from '@paddleocr/paddleocr-js'
 import {withController} from '@snar/lit'
 import {css, html} from 'lit'
 import {withStyles} from 'lit-with-styles'
 import {customElement, query, state} from 'lit/decorators.js'
-import toast from 'toastit'
 import {playShutterAudio} from '../assets/assets.js'
-import {ocrLanguageFlags} from '../constants.js'
 import {cropper} from '../cropper.js'
+import {ocrLanguages} from '../lang.js'
+import {OCR} from '../ocr/index.js'
+import {toast} from '../snackbar.js'
 import {store} from '../store.js'
 import {
 	copyCroppedImageToClipboard,
@@ -36,9 +36,78 @@ export class PageMain extends PageElement {
 	@query('#container') containerElement!: HTMLDivElement
 	@query('img') imgElement!: HTMLImageElement
 
+	#ocr = new OCR(store.ocrLanguage)
+	#ocrLanguage = store.ocrLanguage
+
+	private lastImageKey: string | null = null
+
+	get ocr() {
+		return this.#ocr
+	}
+
 	constructor() {
 		super()
+
 		main = this
+
+		let detectionLoaded = 0
+		let detectionTotal = 0
+		let recognitionLoaded = 0
+		let recognitionTotal = 0
+		let lastToastedProgress = 0
+
+		this.#ocr.onProgress = (progress) => {
+			switch (progress.stage) {
+				case 'cached':
+				case 'downloaded':
+					if (progress.model === 'detection') {
+						detectionLoaded = progress.loaded
+						detectionTotal = progress.total ?? progress.loaded
+					} else {
+						recognitionLoaded = progress.loaded
+						recognitionTotal = progress.total ?? progress.loaded
+					}
+					break
+
+				case 'downloading':
+					if (progress.model === 'detection') {
+						detectionLoaded = progress.loaded
+						detectionTotal = progress.total ?? detectionTotal
+					} else {
+						recognitionLoaded = progress.loaded
+						recognitionTotal = progress.total ?? recognitionTotal
+					}
+					break
+
+				case 'initializing':
+					toast({
+						message: 'Initializing OCR engine...',
+					})
+					console.log('Initializing OCR engine...')
+					break
+
+				case 'ready':
+					toast({
+						message: 'OCR ready',
+					})
+					console.log('OCR ready')
+					break
+			}
+
+			if (!detectionTotal || !recognitionTotal) return
+
+			const loaded = detectionLoaded + recognitionLoaded
+			const total = detectionTotal + recognitionTotal
+			const percentage = Math.floor((loaded / total) * 100)
+
+			if (percentage >= lastToastedProgress + 10) {
+				lastToastedProgress = Math.floor(percentage / 10) * 10
+
+				toast({
+					message: `OCR models: ${lastToastedProgress}%`,
+				})
+			}
+		}
 	}
 
 	render() {
@@ -56,7 +125,7 @@ export class PageMain extends PageElement {
 								</div>
 							</div>
 							<div class="fixed bottom-0 left-0">
-								${ocrLanguageFlags[store.ocrLanguage]}
+								${ocrLanguages[store.ocrLanguage].flag}
 							</div>
 						`
 					: null
@@ -66,18 +135,27 @@ export class PageMain extends PageElement {
 
 	protected firstUpdated() {
 		this.loadImage()
+
 		window.addEventListener('resize', () => this.stretchImage())
+
 		window.addEventListener('paste', async () => {
 			const clipboard = await getClipboardImage()
+
 			if (clipboard === null) {
-				toast('No image to paste')
+				toast({message: 'No image to paste'})
 				return
 			}
+
 			this.loadImage()
 		})
 	}
 
-	private lastImageKey: string | null = null
+	protected updated() {
+		if (this.#ocrLanguage === store.ocrLanguage) return
+
+		this.#ocrLanguage = store.ocrLanguage
+		this.#ocr.setLanguage(this.#ocrLanguage)
+	}
 
 	async loadImage() {
 		const remote = await getRemoteImage()
@@ -178,176 +256,34 @@ export class PageMain extends PageElement {
 				w: x2 - x1,
 				h: y2 - y1,
 			})
+
 			playShutterAudio()
 		} catch {
-			toast('An error has occured.')
+			toast({message: 'An error has occured.'})
 		}
 	}
 
-	#paddleOCR:
-		| Awaited<
-				ReturnType<typeof import('@paddleocr/paddleocr-js').PaddleOCR.create>
-		  >
-		| undefined
-
-	async getPaddleOCR() {
-		if (!this.#paddleOCR) {
-			try {
-				const {PaddleOCR} = await import('@paddleocr/paddleocr-js')
-				this.#paddleOCR = await PaddleOCR.create({
-					lang: 'japan',
-					ocrVersion: 'PP-OCRv5',
-				})
-			} catch {
-				toast("Couldn't create paddleOCR")
-				return
-			}
-		}
-
-		return this.#paddleOCR
-	}
-
-	#framedIndex = 0
-	#framedTextItems: OcrResultItem[] | undefined
-	#frames: OcrResultItem[] | undefined
-	#framesMergeDistance: number | undefined
-
-	async loadFrames({
-		mergeDistance = 20,
-	}: {
-		mergeDistance?: number
-	} = {}) {
-		if (!this.#framedTextItems) {
-			toast('Analyzing, please wait...')
-
-			try {
-				const ocr = await this.getPaddleOCR()
-				if (!ocr) return
-
-				const [result] = await ocr.predict(this.imgElement)
-				this.#framedTextItems = result?.items ?? []
-			} catch {
-				toast('Failed to load OCR.')
-				return
-			}
-		}
-
-		if (!this.#framedTextItems.length) {
-			toast('No text found.')
-			return
-		}
-
-		if (this.#frames && this.#framesMergeDistance === mergeDistance) {
-			return this.#frames
-		}
-
-		const items = this.#framedTextItems.map((item) => ({
-			...item,
-			poly: item.poly.map(([x, y]) => [x, y] as [number, number]),
-		}))
-
-		if (mergeDistance > 0) {
-			let merged = true
-
-			while (merged) {
-				merged = false
-
-				for (let i = 0; i < items.length; i++) {
-					const a = items[i]
-					if (!a) continue
-
-					const ax = a.poly.map(([x]) => x)
-					const ay = a.poly.map(([, y]) => y)
-					const aBox = {
-						x1: Math.min(...ax),
-						y1: Math.min(...ay),
-						x2: Math.max(...ax),
-						y2: Math.max(...ay),
-					}
-
-					for (let j = i + 1; j < items.length; j++) {
-						const b = items[j]
-						if (!b) continue
-
-						const bx = b.poly.map(([x]) => x)
-						const by = b.poly.map(([, y]) => y)
-						const bBox = {
-							x1: Math.min(...bx),
-							y1: Math.min(...by),
-							x2: Math.max(...bx),
-							y2: Math.max(...by),
-						}
-
-						const dx = Math.max(0, aBox.x1 - bBox.x2, bBox.x1 - aBox.x2)
-						const dy = Math.max(0, aBox.y1 - bBox.y2, bBox.y1 - aBox.y2)
-
-						if (Math.hypot(dx, dy) > mergeDistance) continue
-
-						const x1 = Math.min(aBox.x1, bBox.x1)
-						const y1 = Math.min(aBox.y1, bBox.y1)
-						const x2 = Math.max(aBox.x2, bBox.x2)
-						const y2 = Math.max(aBox.y2, bBox.y2)
-
-						items[i] = {
-							...a,
-							text: `${a.text} ${b.text}`,
-							poly: [
-								[x1, y1],
-								[x2, y1],
-								[x2, y2],
-								[x1, y2],
-							],
-						}
-
-						items.splice(j, 1)
-						merged = true
-						break
-					}
-
-					if (merged) break
-				}
-			}
-		}
-
-		this.#frames = items
-		this.#framesMergeDistance = mergeDistance
-
-		return this.#frames
+	async loadFrames(options: {mergeDistance?: number} = {}) {
+		return this.#ocr.loadFrames(this.imgElement, options)
 	}
 
 	async cycleFrame(padding = 15) {
-		const frames = await this.loadFrames()
+		const frame = await this.#ocr.nextFrame(this.imgElement, padding)
 
-		if (!frames) return
+		if (!frame) return
 
-		const item = frames[this.#framedIndex % frames.length]
+		cropper.setCrop(frame)
 
-		if (!item) return
-
-		this.#framedIndex++
-
-		const xs = item.poly.map(([x]) => x)
-		const ys = item.poly.map(([, y]) => y)
-
-		cropper.setCrop({
-			x1: Math.min(...xs) - padding,
-			y1: Math.min(...ys) - padding,
-			x2: Math.max(...xs) + padding,
-			y2: Math.max(...ys) + padding,
-		})
-
-		return item
+		return frame
 	}
 
 	getFrameText() {
-		const frames = this.#frames
-		if (!frames) return
-
-		return frames[this.#framedIndex - 1]?.text
+		return this.#ocr.getFrameText()
 	}
 
-	async ocr() {
+	async recognizeOcr() {
 		const {x1, y1, x2, y2} = cropper
+
 		const blob = await getCroppedImageBlob(this.imgElement, {
 			x: x1,
 			y: y1,
@@ -357,18 +293,6 @@ export class PageMain extends PageElement {
 
 		if (!blob) return
 
-		try {
-			const ocr = await this.getPaddleOCR()
-			if (!ocr) return
-
-			const [result] = await ocr.predict(blob)
-			if (result === undefined) {
-				toast('No text found.')
-				return
-			}
-			return result.items.map((item) => item.text).join('\n')
-		} catch {
-			toast('Something went wrong')
-		}
+		return this.#ocr.recognize(blob)
 	}
 }

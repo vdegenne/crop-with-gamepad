@@ -1,6 +1,6 @@
 @import 'tailwindcss/theme';
 @import 'tailwindcss/utilities';
-/*@source "../../../node_modules/@vdegenne/forms/lib/FormBuilder.js";*/
+/*@source "../../../node_modules/@vdegenne/forms/lib/index.js";*/
 
 [hidden] {
 	display: none !important;

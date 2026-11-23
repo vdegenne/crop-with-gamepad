@@ -1,3 +1,4 @@
+import {cssModules} from '@vdegenne/vite-plugin-css-modules'
 import {materialShell} from 'material-shell/vite.js'
 import {materialAll} from 'rollup-plugin-material-all'
 import {defineConfig} from 'vite'
@@ -21,6 +22,7 @@ const plugins = [
 			}
 		},
 	},
+	cssModules(),
 ]
 
 /** Dev plugins */
@@ -54,7 +56,7 @@ plugins.push(
 		include: [
 			'./src/**/*.ts',
 			'./node_modules/@vdegenne/material-color-helpers/lib/elements/**/*.js',
-			'./node_modules/@vdegenne/forms/lib/FormBuilder.js',
+			'./node_modules/@vdegenne/forms/lib/index.js',
 			'./node_modules/@vdegenne/player/lib/player-dialog.js',
 		],
 	}),

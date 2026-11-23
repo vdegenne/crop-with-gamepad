@@ -1,10 +1,10 @@
 // @ts-nocheck
 
-import {FormBuilder} from '@vdegenne/forms/FormBuilder.js'
+import {FormBuilder} from '@vdegenne/forms'
 import {html} from 'lit'
 import {Comment, commentsManager} from '../comments/index.js'
-import {Dialog} from './dialogs.js'
 import {removeObjectKeys} from '../utils.js'
+import {Dialog} from './dialogs.js'
 
 export function writeComment(comment?: Comment) {
 	return new Promise((resolve, _reject) => {
@@ -57,7 +57,7 @@ export function writeComment(comment?: Comment) {
 							>${type}</md-filled-tonal-button
 						>
 						<!-- -->`,
-			}
+			},
 		)
 	})
 }

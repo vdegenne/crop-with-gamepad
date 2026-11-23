@@ -1,7 +1,7 @@
-import {cquerySelector} from 'html-vision'
-import toast from 'toastit'
+import {$} from 'html-vision'
 import {cropper} from './cropper.js'
 import {openSettingsDialog} from './imports.js'
+import {toast} from './snackbar.js'
 import {store} from './store.js'
 
 const inputNames = ['INPUT', 'TEXTAREA', 'MD-FILLED-TEXT-FIELD']
@@ -24,7 +24,7 @@ window.addEventListener('keypress', async (event: KeyboardEvent) => {
 		return
 	}
 
-	const button = cquerySelector(`[key="${event.key}"]`)
+	const button = $(`[key="${event.key}"]`)
 	if (button) {
 		button?.click()
 		return
@@ -44,7 +44,7 @@ window.addEventListener('keypress', async (event: KeyboardEvent) => {
 				x2: cropper.x2,
 				y2: cropper.y2,
 			}
-			toast('Crop values saved')
+			toast({message: 'Crop values saved'})
 			break
 	}
 })

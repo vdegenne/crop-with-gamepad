@@ -1,5 +1,5 @@
 :root {
-	/* --md-icon-font: 'Material Symbols Rounded'; */
+	--md-icon-font: 'Material Symbols Outlined';
 	--md-list-container-color: transparent;
 	-webkit-tap-highlight-color: transparent;
 	--md-elevation-level: 2 !important;

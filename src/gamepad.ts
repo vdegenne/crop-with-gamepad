@@ -2,11 +2,12 @@ import {ReactiveController} from '@snar/lit'
 import {textSelectorOpen, textSelectorUrl} from '@vdegenne/links'
 import {MGamepad, MiniGamepad, Mode} from '@vdegenne/mini-gamepad'
 import {state} from 'lit/decorators.js'
-import toast from 'toastit'
 import {cropper} from './cropper.js'
 import {getMainPage} from './pages/index.js'
 import {main} from './pages/page-main.js'
+import {toast} from './snackbar.js'
 import {store} from './store.js'
+import {setVoicevoxRandomVoice, ttsPlayer} from './tts.js'
 import {copyToClipboard} from './utils.js'
 
 class GamepadController extends ReactiveController {
@@ -98,31 +99,13 @@ class GamepadController extends ReactiveController {
 			})
 
 			gamepad.for(dpadleft).before(async ({mode}) => {
-				if (mode === Mode.NORMAL) {
+				if (mode === Mode.PRIMARY) {
 					await getMainPage().copyCroppedImageInClipboard()
 					const url = 'https://chatgpt.com/'
 					if (store.openLinksInNewTab) {
 						window.open(url, '_blank')
 					} else {
 						window.location.href = url
-					}
-				} else if (mode === Mode.PRIMARY) {
-					// const url = 'https://chatgpt.com/'
-					// if (store.openLinksInNewTab) {
-					// 	window.open(url, '_blank')
-					// } else {
-					// 	window.location.href = url
-					// }
-					const text =
-						getMainPage().getFrameText() ?? (await getMainPage()?.ocr())
-					if (text) {
-						if (store.openLinksInNewTab) {
-							textSelectorOpen(text)
-						} else {
-							window.location.href = textSelectorUrl(text)
-						}
-					} else {
-						toast('No text found')
 					}
 				}
 			})
@@ -153,12 +136,14 @@ class GamepadController extends ReactiveController {
 						main.copyCroppedImageInClipboard()
 						break
 					case Mode.TERTIARY:
-						const text = await getMainPage().ocr()
+						const text = await getMainPage().recognizeOcr()
 						if (text) {
 							copyToClipboard(text)
-							toast(text.length > 20 ? text.slice(0, 20) + '...' : text)
+							toast({
+								message: text.length > 20 ? text.slice(0, 20) + '...' : text,
+							})
 						} else {
-							toast('No text found')
+							toast({message: 'No text found'})
 						}
 						break
 				}
@@ -172,6 +157,22 @@ class GamepadController extends ReactiveController {
 				}
 			})
 
+			gamepad.for(l1).before(async ({mode}) => {
+				switch (mode) {
+					case Mode.SECONDARY:
+						await setVoicevoxRandomVoice()
+					case Mode.NORMAL:
+						let text = main.ocr.getFrameText()
+						if (!text) {
+							text = await main.recognizeOcr()
+						}
+						if (text) {
+							ttsPlayer.play([text, store.ocrLanguage])
+						}
+						break
+				}
+			})
+
 			let isCycling = false
 			gamepad.for(X).before(async ({mode}) => {
 				switch (mode) {
@@ -180,8 +181,30 @@ class GamepadController extends ReactiveController {
 						try {
 							isCycling = true
 							await getMainPage()?.cycleFrame()
+						} catch (err) {
+							console.log(err)
 						} finally {
 							isCycling = false
+						}
+						break
+					case Mode.PRIMARY:
+						// const url = 'https://chatgpt.com/'
+						// if (store.openLinksInNewTab) {
+						// 	window.open(url, '_blank')
+						// } else {
+						// 	window.location.href = url
+						// }
+						const text =
+							getMainPage().getFrameText() ??
+							(await getMainPage()?.recognizeOcr())
+						if (text) {
+							if (store.openLinksInNewTab) {
+								textSelectorOpen(text)
+							} else {
+								window.location.href = textSelectorUrl(text)
+							}
+						} else {
+							toast({message: 'No text found'})
 						}
 						break
 				}
