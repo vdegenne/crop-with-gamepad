@@ -94,7 +94,7 @@
 		"@vdegenne/about-dialog": "^0.4.2",
 		"@vdegenne/audio-player": "^0.1.5",
 		"@vdegenne/debouncer": "^1.0.17",
-		"@vdegenne/forms": "file:../forms",
+		"@vdegenne/forms": "^1.0.3",
 		"@vdegenne/links": "^1.8.26",
 		"@vdegenne/lit-debug": "^0.1.2",
 		"@vdegenne/material-color-helpers": "^1.11.7",
