@@ -95,7 +95,7 @@
 		"@vdegenne/audio-player": "^0.1.5",
 		"@vdegenne/debouncer": "^1.0.17",
 		"@vdegenne/forms": "^1.0.4",
-		"@vdegenne/links": "^1.8.27",
+		"@vdegenne/links": "^1.8.28",
 		"@vdegenne/lit-debug": "^0.1.2",
 		"@vdegenne/material-color-helpers": "^1.11.7",
 		"@vdegenne/mini-gamepad": "^0.4.17",
