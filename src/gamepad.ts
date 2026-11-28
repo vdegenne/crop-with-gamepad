@@ -5,6 +5,7 @@ import {state} from 'lit/decorators.js'
 import {cropper} from './cropper.js'
 import {getMainPage} from './pages/index.js'
 import {main} from './pages/page-main.js'
+import {lockDefaultCropRegion} from './server/functions.js'
 import {toast} from './snackbar.js'
 import {store} from './store.js'
 import {setVoicevoxRandomVoice, ttsPlayer} from './tts.js'
@@ -206,6 +207,9 @@ class GamepadController extends ReactiveController {
 						} else {
 							toast({message: 'No text found'})
 						}
+						break
+					case Mode.TERTIARY:
+						lockDefaultCropRegion()
 						break
 				}
 			})

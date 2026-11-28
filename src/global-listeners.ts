@@ -1,8 +1,6 @@
 import {$} from 'html-vision'
-import {cropper} from './cropper.js'
 import {openSettingsDialog} from './imports.js'
-import {toast} from './snackbar.js'
-import {store} from './store.js'
+import {lockDefaultCropRegion} from './server/functions.js'
 
 const inputNames = ['INPUT', 'TEXTAREA', 'MD-FILLED-TEXT-FIELD']
 export function eventIsFromInput(event: Event) {
@@ -38,13 +36,7 @@ window.addEventListener('keypress', async (event: KeyboardEvent) => {
 			openSettingsDialog()
 			break
 		case 'c':
-			store.defaultCropValues = {
-				x1: cropper.x1,
-				y1: cropper.y1,
-				x2: cropper.x2,
-				y2: cropper.y2,
-			}
-			toast({message: 'Crop values saved'})
+			lockDefaultCropRegion()
 			break
 	}
 })
