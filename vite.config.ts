@@ -1,32 +1,24 @@
 import {cssModules} from '@vdegenne/vite-plugin-css-modules'
 import {materialShell} from 'material-shell/vite.js'
-import {materialAll} from 'rollup-plugin-material-all'
-import {defineConfig} from 'vite'
-import {mdicon2svg} from 'vite-plugin-mdicon2svg'
+import {materialWebAll} from 'material-web-all-plugin/vite'
+import {defineConfig, type PluginOption} from 'vite'
+// import { mdicon2svg } from 'vite-plugin-mdicon2svg'
 
-/**
- * @type {import('vite').Plugin[]}
- */
-const plugins = [
-	{
-		name: 'ignore-file-change',
-		handleHotUpdate({file, server}) {
-			// console.log(file);
-			if (
-				['data.json', 'server.js', 'server.ts'].some((ignore) =>
-					file.endsWith(ignore),
-				)
-			) {
-				// Ne rien faire = ne pas déclencher de HMR ni de reload
-				return []
-			}
-		},
-	},
-	cssModules(),
-]
+const plugins: PluginOption[] = []
 
-/** Dev plugins */
-if (process.env.NODE_ENV.startsWith('dev')) {
+try {
+	const {visualizer} = await import('rollup-plugin-visualizer')
+	plugins.push(
+		visualizer({
+			filename: './dist/stats.html',
+			gzipSize: true,
+			brotliSize: true,
+			open: true,
+		}),
+	)
+} catch {}
+
+if (process.env.NODE_ENV?.startsWith('dev')) {
 	try {
 		const {vscodeUiConnectorPlugin} = await import('vscode-ui-connector')
 		plugins.push(
@@ -36,30 +28,40 @@ if (process.env.NODE_ENV.startsWith('dev')) {
 			}),
 		)
 	} catch {}
+
+	// try {
+	// 	plugins.push({
+	// 		name: 'ignore-file-change',
+	// 		handleHotUpdate({ file, server }) {
+	// 			// console.log(file);
+	// 			if (
+	// 				['data.json', 'server.js', 'server.ts'].some((ignore) =>
+	// 					file.endsWith(ignore),
+	// 				)
+	// 			) {
+	// 				// Ne rien faire = ne pas déclencher de HMR ni de reload
+	// 				return []
+	// 			}
+	// 		},
+	// 	})
+	// } catch {}
 }
 
-try {
-	const {default: basicSsl} = await import('@vitejs/plugin-basic-ssl')
-	plugins.push(basicSsl())
-} catch {}
-
-/** Material plugins */
 plugins.push(
+	cssModules(),
 	materialShell({
 		// pathToDefaultMaterialStyleSheet: './src/styles/stylesheets/material.css',
 	}),
-	materialAll({
-		//includeComments: true
-	}),
-	mdicon2svg({
-		variant: 'rounded',
-		include: [
-			'./src/**/*.ts',
-			'./node_modules/@vdegenne/material-color-helpers/lib/elements/**/*.js',
-			'./node_modules/@vdegenne/forms/lib/index.js',
-			'./node_modules/@vdegenne/player/lib/player-dialog.js',
-		],
-	}),
+	materialWebAll({emulateProduction: true}),
+	// mdicon2svg({
+	// 	variant: 'rounded',
+	// 	include: [
+	// 		'./src/**/*.ts',
+	// 		'./node_modules/@vdegenne/material-color-helpers/lib/elements/**/*.js',
+	// 		'./node_modules/@vdegenne/forms/lib/index.js',
+	// 		'./node_modules/@vdegenne/player/lib/player-dialog.js',
+	// 	],
+	// }),
 )
 
 if (process.env.NODE_ENV === 'production') {
@@ -70,14 +72,6 @@ if (process.env.NODE_ENV === 'production') {
 	try {
 		const {minifyHtml} = await import('@vdegenne/rollup-plugin-minify-html')
 		plugins.push(minifyHtml())
-	} catch {}
-	try {
-		const {viteSingleFile} = await import('vite-plugin-singlefile')
-		plugins.push(
-			viteSingleFile({
-				useRecommendedBuildConfig: false,
-			}),
-		)
 	} catch {}
 }
 
@@ -161,9 +155,13 @@ export default defineConfig({
 		// 		print: pathlib.resolve(__dirname, 'print/index.html'),
 		// 	},
 		// },
-	},
-	esbuild: {
-		legalComments: 'none',
+		rolldownOptions: {
+			output: {
+				comments: {
+					legal: false,
+				},
+			},
+		},
 	},
 	plugins,
 })

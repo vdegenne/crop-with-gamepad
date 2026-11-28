@@ -25,10 +25,31 @@ function getSnackbar() {
 	return snackbar
 }
 
-export function toast(options: ToastOptions) {
+export function toast(): Promise<void>
+export function toast(options: ToastOptions): Promise<void>
+export function toast(
+	message: string,
+	options?: Omit<ToastOptions, 'message'>,
+): Promise<void>
+
+export async function toast(
+	messageOrOptions: string | ToastOptions = 'Hello world',
+	options: Omit<ToastOptions, 'message'> = {},
+) {
 	const snackbar = getSnackbar()
 
-	snackbar.labelText = options.message
+	const message =
+		typeof messageOrOptions === 'string'
+			? messageOrOptions
+			: (messageOrOptions.message ?? 'Hello world')
+
+	if (typeof messageOrOptions !== 'string') {
+		options = messageOrOptions
+	}
+
+	await snackbar.close()
+
+	snackbar.labelText = message
 	snackbar.actionLabel = options.actionLabel ?? ''
 	snackbar.hasCloseButton = options.hasCloseButton ?? false
 	snackbar.closeLabel = options.closeLabel ?? 'Close'

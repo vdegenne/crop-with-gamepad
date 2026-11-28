@@ -1,5 +1,4 @@
 import {PropertyValues, ReactiveController, state} from '@snar/lit'
-import {FormBuilder} from '@vdegenne/forms'
 import {speakEnglish} from '@vdegenne/speech'
 import {Style} from '@vdegenne/voicevox/core'
 import {saveToLocalStorage} from 'snar-save-to-local-storage'
@@ -32,8 +31,6 @@ export class AppStore extends ReactiveController {
 		x2: number
 		y2: number
 	} | null = null
-
-	F = new FormBuilder(this)
 
 	protected firstUpdated(_changedProperties: PropertyValues): void {
 		if (!this.persistLang) {

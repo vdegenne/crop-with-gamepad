@@ -1,25 +1,14 @@
-import '@mahmoodkhalil/material-web-3-demo/labs/gb/components/dialog/md-gb-dialog.js'
-import type {MdDialog} from '@material/web/all.js'
-import '@material/web/chips/chip-set.js'
-import '@material/web/chips/filter-chip.js'
-import '@material/web/labs/gb/components/button/md-gb-button.js'
-// import '@material/web/labs/gb/components/chip/md-gb-chip.js'
-// import '@material/web/labs/gb/components/chip/md-gb-chip-set.js'
-import '@mahmoodkhalil/material-web-3-demo/labs/gb/components/chip/md-gb-chip-set.js'
-import '@mahmoodkhalil/material-web-3-demo/labs/gb/components/chip/md-gb-chip.js'
-import '@material/web/labs/gb/components/list/md-gb-list-item.js'
-import '@material/web/labs/gb/components/switch/md-gb-switch.js'
+import {type MdDialog} from '@material/web/dialog/dialog.js'
 import {withController} from '@snar/lit'
 import {customElement} from 'custom-element-decorator'
 import {html, LitElement} from 'lit'
 import {withStyles} from 'lit-with-styles'
 import {query} from 'lit/decorators.js'
 import '../card-element.js'
+import {FILTER} from '../forms/components/filter.js'
+import {SWITCH} from '../forms/components/switch.js'
 import {getOcrLanguageList} from '../lang.js'
-import '../material/dialog-patch.js'
-import '../material/item-patch.js'
 import {store} from '../store.js'
-import {renderThemeElements} from '../styles/theme-elements.js'
 import {themeStore} from '../styles/themeStore.js'
 import styles from './settings-dialog.css?inline'
 
@@ -28,21 +17,24 @@ import styles from './settings-dialog.css?inline'
 @withController(themeStore)
 @withController(store)
 export class SettingsDialog extends LitElement {
-	@query('md-gb-dialog') dialog!: MdDialog
+	@query('md-dialog') dialog!: MdDialog
 
 	render() {
 		return html`
-			<md-gb-dialog>
-				<span slot="headline">Settings</span>
+			<md-dialog>
+				<span slot="headline" class="flex gap-3"
+					><md-gb-icon>settings</md-gb-icon>Settings</span
+				>
 
-				<div class="flex flex-col gap-4">
+				<div slot="content" class="flex flex-col gap-4">
 					<card-element headline="global">
-						${store.F.SWITCH('Open links in new tab?', 'openLinksInNewTab')}
+						${SWITCH('Open links in new tab?', store, 'openLinksInNewTab')}
 					</card-element>
 
 					<card-element headline="OCR">
-						${store.F.FILTER(
+						${FILTER(
 							'Languages',
+							store,
 							'ocrActivatedLanguages',
 							getOcrLanguageList(),
 							{
@@ -51,23 +43,19 @@ export class SettingsDialog extends LitElement {
 								required: true,
 							},
 						)}
-						${store.F.SWITCH('Persist OCR language', 'persistLang', {
+						${SWITCH('Persist OCR language', store, 'persistLang', {
 							supportingText: 'Across page refresh',
 						})}
-						${store.F.SWITCH('Switch speech', 'ocrSwitchSpeech', {
+						${SWITCH('Switch speech', store, 'ocrSwitchSpeech', {
 							supportingText: 'Speak the selected lang when switched',
 						})}
-					</card-element>
-
-					<card-element headline="theme">
-						${renderThemeElements()}
 					</card-element>
 				</div>
 
 				<form id="form" method="dialog"></form>
 
-				<md-gb-button slot="actions" form="form">Close</md-gb-button>
-			</md-gb-dialog>
+				<div slot="actions"><md-gb-button form="form">Close</md-gb-button></div>
+			</md-dialog>
 		`
 	}
 
