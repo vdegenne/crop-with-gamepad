@@ -1,0 +1,1 @@
+import{h as e,l as t,o as n,s as r,t as i,x as a,y as o}from"./store-BQ2qypCq.js";import{n as s}from"./index-pVmxSPGF.js";var c=class extends s{render(){return o`404 NOT FOUND`}};c=r([n(`page-404`),t(i),e(a``)],c);export{c as Page404};
